@@ -109,3 +109,69 @@ dtm_mbeki <- mbeki_tdf %>% cast_dtm(year, word, n)
 dtm_ramaphosa <- ramaphosa_tdf %>% cast_dtm(year, word, n)
 dtm_zuma <- zuma_tdf %>% cast_dtm(year, word, n)
 dtm_all <- all_tdf %>% cast_dtm(year, word, n)
+
+mandela_lda <- LDA(dtm_mandela, k = 3, control = list(seed = 2023))
+mbeki_lda <- LDA(dtm_mbeki, k = 3, control = list(seed = 2023))
+ramaphosa_lda <- LDA(dtm_ramaphosa, k = 3, control = list(seed = 2023))
+zuma_lda <- LDA(dtm_zuma, k = 3, control = list(seed = 2023))
+all_lda <- LDA(dtm_all, k = 3, control = list(seed = 2023))
+
+
+mandela_word_topics <- tidy(mandela_lda, matrix = 'beta')
+mbeki_word_topics <- tidy(mbeki_lda, matrix = 'beta')
+ramaphosa_word_topics <- tidy(ramaphosa_lda, matrix = 'beta')
+zuma_word_topics <- tidy(zuma_lda, matrix = 'beta')
+all_word_topics <- tidy(all_lda, matrix = 'beta')
+
+
+mandela_word_topics %>%
+  group_by(topic) %>%
+  slice_max(n = 20, order_by = beta) %>% ungroup() %>%
+  arrange(topic, -beta) %>%
+  ggplot(aes(reorder(term, beta), beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = 'free') + coord_flip()
+
+
+mbeki_word_topics %>%
+  group_by(topic) %>%
+  slice_max(n = 20, order_by = beta) %>% ungroup() %>%
+  arrange(topic, -beta) %>%
+  ggplot(aes(reorder(term, beta), beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = 'free') + coord_flip()
+
+zuma_word_topics %>%
+  group_by(topic) %>%
+  slice_max(n = 20, order_by = beta) %>% ungroup() %>%
+  arrange(topic, -beta) %>%
+  ggplot(aes(reorder(term, beta), beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = 'free') + coord_flip()
+
+ramaphosa_word_topics %>%
+  group_by(topic) %>%
+  slice_max(n = 20, order_by = beta) %>% ungroup() %>%
+  arrange(topic, -beta) %>%
+  ggplot(aes(reorder(term, beta), beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = 'free') + coord_flip()
+
+
+all_word_topics %>%
+  group_by(topic) %>%
+  slice_max(n = 20, order_by = beta) %>% ungroup() %>%
+  arrange(topic, -beta) %>%
+  ggplot(aes(reorder(term, beta), beta, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = 'free') + coord_flip()
+
+
+# Document topic probabilities
+gamma <- tidy(all_lda, matrix = 'gamma') 
+
+sona_gamma <- left_join(sona, 
+                           gamma,
+                           by = c("year" = "document"))
+
+
