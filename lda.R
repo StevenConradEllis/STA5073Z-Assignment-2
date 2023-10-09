@@ -8,6 +8,13 @@ library(MASS)
 library(topicmodels)
 
 
+#Topic modelling is a type of bag-of-words model that aims to summarize a document by describing it in 
+# terms of a small number of “topics”. The resulting descriptions can then be used for several purposes, 
+# for example, to judge similarity between documents and to cluster together similar documents, 
+# or for document classification. This notebook covers topic modelling and 
+# in particular one method used to do topic modelling, latent dirichlet allocation.
+
+
 set.seed(2023)
 
 # read in text data files and organise these into a data frame
