@@ -67,7 +67,7 @@ sona$pres <- str_remove_all(str_extract(sona$filename, "[dA-Z].*\\."), "\\.")
 replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;|\n'
 
 sona <-sona %>%
-  mutate(speech = stringr::str_replace_all(speech, replace_reg , ' ')
+  mutate(speech = lemmatize_strings(stringr::str_replace_all(speech, replace_reg , ' '))
          ,date = str_sub(speech, start=1, end=30)
          ,date = str_replace_all(date, "February", "02")
          ,date = str_replace_all(date, "June", "06")
@@ -105,7 +105,7 @@ sona_tdf <- tidy_sona %>%
   ungroup()
 
 # Remove common SONA words that are used very regularly, but which don't convey too much meaning
-common_sona_reg <- 'honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+common_sona_reg <- 'speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
 sona_tdf <- sona_tdf %>% filter(!grepl(common_sona_reg, word))
 
 # Create a DocumentTermMatrix object using cast_dtm(), required by the topicmodels package 
@@ -126,7 +126,7 @@ sona_topics <- tidy(sona_lda, matrix = "beta")
 # Use dplyr’s slice_max() to find the 10 terms that are most common within each topic
 sona_top_terms <- sona_topics %>%
   group_by(topic) %>%
-  slice_max(beta, n = 10) %>% 
+  slice_max(beta, n = 20) %>% 
   ungroup() %>%
   arrange(topic, -beta)
 
@@ -137,5 +137,210 @@ sona_top_terms %>%
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
+
+# Examine the per-document-per-topic probabilities, γ (“gamma”), 
+# with the matrix = "gamma" argument to tidy()
+sona_documents <- tidy(sona_lda, matrix = "gamma")
+
+# Determine which president has the highest gamma score per topic
+sona_documents %>%
+  group_by(topic) %>%
+  slice_max(order_by = gamma, n = 1) %>%
+  ungroup()
+
+# Consider the terms that had the greatest difference in β
+# between topic 1 and topic 2, based on the log ratio of the two
+beta_wide <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic1 > .001 | topic2 > .001) %>%
+  mutate(log_ratio = log2(topic2 / topic1))
+
+# Visualize
+beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
+  coord_flip()
+
+
+# Consider the terms that had the greatest difference in β
+# between topic 1 and topic 3, based on the log ratio of the two
+beta_wide2 <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic1 > .001 | topic3 > .001) %>%
+  mutate(log_ratio = log2(topic3 / topic1))
+
+# Visualize
+beta_wide2 %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 3 / topic 1') +
+  coord_flip()
+
+
+# Consider the terms that had the greatest difference in β
+# between topic 1 and topic 4, based on the log ratio of the two
+beta_wide3 <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic1 > .001 | topic4 > .001) %>%
+  mutate(log_ratio = log2(topic4 / topic1))
+
+# Visualize
+beta_wide3 %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 4 / topic 1') +
+  coord_flip()
+
+
+
+ramaphosa_sona <- sona %>% filter(pres == "Ramaphosa")
+zuma_sona <- sona %>% filter(pres == "Zuma")
+
+# turn into tidy text 
+tidy_ramaphosa_sona <- ramaphosa_sona %>% 
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
+  dplyr::select(word, pres, date, filename)            #choose the variables we need 
+
+
+tidy_zuma_sona <- zuma_sona %>% 
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
+  dplyr::select(word, pres, date, filename) 
+
+
+ramaphosa_sona_tdf <- tidy_ramaphosa_sona %>%
+  group_by(filename,word) %>%
+  count() %>%  
+  ungroup()
+
+zuma_sona_tdf <- tidy_zuma_sona %>%
+  group_by(filename,word) %>%
+  count() %>%  
+  ungroup()
+
+# Remove common SONA words that are used very regularly, but which don't convey too much meaning
+common_sona_reg <- 'madam|percent|speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+ramaphosa_sona_tdf <- ramaphosa_sona_tdf %>% filter(!grepl(common_sona_reg, word))
+zuma_sona_tdf <- zuma_sona_tdf %>% filter(!grepl(common_sona_reg, word))
+
+
+dtm_ramaphosa_sona <- ramaphosa_sona_tdf %>% cast_dtm(filename, word, n)
+dtm_zuma_sona <- zuma_sona_tdf %>% cast_dtm(filename, word, n)
+
+# Estimate the parameters of the topic model using LDA
+ramaphosa_sona_lda <- LDA(dtm_ramaphosa_sona, k = 4, control = list(seed = 1234))
+zuma_sona_lda <- LDA(dtm_zuma_sona, k = 4, control = list(seed = 2345))
+
+# Use the tidy() function by the  tidytext package 
+# for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
+ramaphosa_sona_topics <- tidy(ramaphosa_sona_lda, matrix = "beta")
+zuma_sona_topics <- tidy(zuma_sona_lda, matrix = "beta")
+
+
+ramaphosa_sona_top_terms <- ramaphosa_sona_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 20) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+
+
+zuma_sona_top_terms <- zuma_sona_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 20) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+
+# Visualize using ggplot
+ramaphosa_sona_top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+
+zuma_sona_top_terms %>%
+  mutate(term = reorder_within(term, beta, topic)) %>%
+  ggplot(aes(beta, term, fill = factor(topic))) +
+  geom_col(show.legend = FALSE) +
+  facet_wrap(~ topic, scales = "free") +
+  scale_y_reordered()
+
+
+ramaphosa_sona_documents <- tidy(ramaphosa_sona_lda, matrix = "gamma")
+zuma_sona_documents <- tidy(zuma_sona_lda, matrix = "gamma")
+
+# Determine which president has the highest gamma score per topic
+ramaphosa_sona_documents %>%
+  group_by(topic) %>%
+  slice_max(order_by = gamma, n = 1) %>%
+  ungroup()
+
+
+zuma_sona_documents %>%
+  group_by(topic) %>%
+  slice_max(order_by = gamma, n = 1) %>%
+  ungroup()
+
+
+ramaphosa_beta_wide <- ramaphosa_sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic1 > .001 | topic2 > .001) %>%
+  mutate(log_ratio = log2(topic2 / topic1))
+
+# Visualize
+ramaphosa_beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
+  coord_flip()
+
+
+
+
+zuma_beta_wide <- zuma_sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic2 > .001 | topic3 > .001) %>%
+  mutate(log_ratio = log2(topic3 / topic2))
+
+# Visualize
+zuma_beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio)) +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 4 / topic 3') +
+  coord_flip()
+
+
+
+
+
 
 
