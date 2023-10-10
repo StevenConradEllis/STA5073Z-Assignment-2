@@ -96,7 +96,6 @@ tidy_sona <- sona %>%
   filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
   dplyr::select(word, pres, date, filename)            #choose the variables we need 
 
-
 # Count the number of times each word in our vocabulary was used by each president, 
 # creating a "long" (and tidy) format of the document-term matrix.
 sona_tdf <- tidy_sona %>%
