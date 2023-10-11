@@ -168,39 +168,15 @@ Summary of tools used for sentiment analysis (R packages), how data was pre-proc
 
 ```{r lda_all, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
-# clean the sona dataset by adding the date and removing unnecessary text
-replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;|\n'
-
-# lemmatise strings, fix dates, remove non-words
-sona <-sona %>%
-  mutate(speech = lemmatize_strings(stringr::str_replace_all(speech, replace_reg , ' '))
-         ,date = str_sub(speech, start=1, end=30)
-         ,date = str_replace_all(date, "February", "02")
-         ,date = str_replace_all(date, "June", "06")
-         ,date = str_replace_all(date, "Feb", "02")
-         ,date = str_replace_all(date, "May", "05")
-         ,date = str_replace_all(date, "Jun", "06")
-         ,date = str_replace_all(date, "Thursday, ","")
-         ,date = str_replace_all(date, ' ', '-')        
-         ,date = str_replace_all(date, "[A-z]",'')
-         ,date = str_replace_all(date, '-----', '')
-         ,date = str_replace_all(date, '----', '')
-         ,date = str_replace_all(date, '---', '')
-         ,date = str_replace_all(date, '--', '')
-  )
-
-# Convert to tibble
-sona <- as.tibble(sona)
-
 replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;'
 unnest_reg <- "[^\\w_#@'’]"
 
 # turn into tidy text 
 tidy_sona <- sona %>% 
-  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
-  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>% # remove links etx
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   # tokenize
   filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
-  dplyr::select(word, pres, date, filename)            #choose the variables we need 
+  dplyr::select(word, pres, date, filename)  # select variables needed
 
 # Count the number of times each word in our vocabulary was used by each president, 
 # creating a "long" (and tidy) format of the document-term matrix.
@@ -224,7 +200,7 @@ sona_lda <- LDA(dtm_sona, k = 4, control = list(seed = 1234))
 # for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
 sona_topics <- tidy(sona_lda, matrix = "beta")
 
-# Notice that this has turned the model into a one-topic-per-term-per-row format. 
+# The model is now in one-topic-per-term-per-row format. 
 # For each combination, the model computes the probability of that term 
 # being generated from that topic. 
 
@@ -250,7 +226,7 @@ Results introduction
 
 ```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
-# Visualize using ggplot
+# Visualize top terms per topic using ggplot
 sona_top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -263,7 +239,7 @@ sona_top_terms %>%
 
 ```{r lda_doc, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
-# Examine the per-document-per-topic probabilities, γ (“gamma”), 
+# Examine the per-president-per-topic probabilities, γ (“gamma”), 
 # with the matrix = "gamma" argument to tidy()
 sona_documents <- tidy(sona_lda, matrix = "gamma")
 
@@ -281,6 +257,7 @@ sona_document_prob <- sona_documents %>%
 #| tbl-cap: "President-Per-Topic Probabilities"
 #| tbl-colwidths: [60,20,20]
 
+# display the president per-topic probabilities
 library(knitr)
 kable(sona_document_prob)
 ```
