@@ -1,0 +1,198 @@
+---
+author:
+  - name: Andrew N. Other
+    note: A shared note
+  - name: Fred T. Secondauthor
+    affiliations: 
+      - name: Current address
+        city: Some other place
+        country: Germany
+  - name: I. Ken Groupleader
+    email: i.k.groupleader@unknown.uu
+    phone: +123 (0)123 4445556
+    fax: +123 (0)123 4445557
+    affiliations: 
+      - id: unknown1
+        name: Unknown University
+        department: Department of Chemistry
+        town: Unknown Town
+      - id: second-uni
+        name: Second University
+        department: Department of Chemistry
+        town: Nearby Town
+    note: A shared note
+  - name: Susanne K. Laborator
+    email: s.k.laborator@bigpharma.co
+    affiliations: 
+      - name: BigPharma
+        town: Big Town
+        country: USA
+  - name: Kay T. Finally
+    affiliations:
+      - ref: second-uni
+      - ref: unknown1
+        
+title: A demonstration of the _achemso_ {{< latex >}} class^[A footnote for the title]
+title-short: An _achemso_ demo
+keywords: American Chemical Society, LaTeX
+abstract: |
+  This is an example document for the _achemso_ documentclass, intended for submissions to the American Chemical Society for publication. The class is based on the standard LaTeXe _report_ file, and does not seek to reproduce the appearanceof a published paper.
+  This is an abstract for the _achemso_ document class demonstration document.  An abstract is only allowed for certain manuscript types.  The selection of `journal` and `manuscript` will determine if an abstract is valid.  If not, the class will issue an appropriate error.This is the abstract.
+bibliography: bibliography.bib
+format:
+  acs-pdf:
+    journal:
+      id: jacsat  #This is an identifier for the target journal: from https://pubs.acs.org/, the identifier is the part of the URL after https://pubs.acs.org/journal/, e.g. for J. Org. Chem. it would be joceah.
+      type: article  #article, note, communication, review, letter, or perspectivee
+      layout: traditional #traditional or twocolumn, twocolumn currently broken for longtables
+      hide-email: false # if enabled, hides email addresses (and fax/phone)
+      abbreviations: IR,NMR,UV
+  acs-html: default
+---
+
+:::{.tocentry}
+Some journals require a graphical entry for the Table of Contents.
+This should be laid out ``print ready'' so that the sizing of the
+text is correct.
+
+Inside the `tocentry` environment, the font used is Helvetica
+8\,pt, as required by *Journal of the American Chemical
+Society*.
+
+The surrounding frame is 9cm by 3.5cm, which is the maximum
+permitted for  *Journal of the American Chemical Society*
+graphical table of content entries. The box will not resize if the
+content is too big: instead it will overflow the edge of the box.
+
+This box and the associated title will always be printed on a
+separate page at the end of the document.
+:::
+
+## Introduction
+
+This is a paragraph of text to fill the introduction of the demonstration file. The demonstration file attempts to show the modifications of the standard LaTeX macros that are implemented by the `achemso` class. These are mainly concerned with content, as opposed to appearance.
+
+## Results and discussion
+
+### Outline
+
+The document layout should follow the style of the journal concerned. Where appropriate, sections and subsections should be added in the normal way. If the class options are set correctly, warnings will be given if these should not be present.
+
+### References
+
+The class makes various changes to the way that references are handled. The class loads `natbib`, and also the appropriate bibliography style. References can be made using the normal method; the citation should be placed before any punctuation, as the class will move it if using a superscript citation style [@Garnier2007]. The use of `natbib` allows the use of the various citation commands of that package have shown something. Long lists of authors will be automatically truncated in most article formats, but not in supplementary information or reviews. If you encounter problems with the citation macros, please check that your copy of `natbib` is up to date. The demonstration database file `bibliography.bib` shows how to complete entries correctly.
+
+Multiple citations to be combined into a list can be given as a single citation. This uses the `mciteplus` package. Citations other than the first of the list should be indicated with a star.
+
+The class also handles notes to be added to the bibliography. These should be given in place in the document. As with citations, the text should be placed before punctuation. A note is also generated if a citation has an optional note. This assumes that the whole work has already been cited: odd numbering will result if this is not the case .
+
+### Floats
+
+New float types are automatically set up by the class file. The means graphics are included as follows (@fig-example). As illustrated, the float is `here` if possible.
+
+
+:::{.scheme}
+Your scheme graphic would go here: `.eps` format
+for {{< latex >}}, or `.pdf` (or `.png`) for pdf\\{{< latex >}}
+{{< smallcaps chemdraw >}} files are best saved as `.eps` files:
+these can be scaled without loss of quality, and can be
+converted to `.pdf` files easily using `eps2pdf`.
+::: 
+
+![An example scheme](placeholder.png){#fig-example}
+
+
+
+:::{#fig-example2 fig-cap="A second example figure"}
+As well as the standard float types `table` and `figure`, the class also recognises `scheme`, `chart` and `graph`.
+:::
+
+Charts, figures and schemes do not necessarily have to be labelled or captioned. However, tables should always have a title. It is possible to include a number and label for a graphic without any title, using an empty argument to the `\caption` macro.
+
+The use of the different floating environments is not required, but it is intended to make document preparation easier for authors. In general, you should place your graphics where they make logical sense; the production process will move them if needed.
+
+### Math(s)
+
+The `achemso` class does not load any particular additional support for mathematics. If packages such as `amsmath` are required, they should be loaded in the preamble. However, the basic LaTeX math(s) input should work correctly without this. Some inline material $y = mx + c$ or $1 + 1 = 2$ followed by some display.
+
+$$ A = \pi r^2 $$
+
+It is possible to label equations in the usual way (@eq-example).
+
+$$
+  \frac{\mathrm{d}}{\mathrm{d}x} \, r^2 = 2r
+$$ {#eq-example}
+
+This can also be used to have equations containing graphical content. To align the equation number with the middle of the graphic, rather than the bottom, a minipage may be used.
+
+```{=latex}
+$$
+  \begin{minipage}[c]{0.80\linewidth}
+    \centering
+    As illustrated here, the width of \\
+    the minipage needs to allow some  \\
+    space for the number to fit in to.
+    %\includegraphics{graphic}
+  \end{minipage}
+$$
+```
+
+## Experimental
+
+The usual experimental details should appear here. This could include a table, which can be referenced as @tbl-example. Notice that the caption is positioned at the top of the table.
+
+| Header one  | Header two  |
+|-------------|-------------|
+| Entry one   | Entry two   |
+| Entry three | Entry four  |
+| Entry five  | Entry six   |
+| Entry seven | Entry eight |
+
+: An example table {#tbl-example}
+
+You may add footnotes to ables as illustrated (@tbl-notes).
+
+| Header one      | Header two  |
+|-----------------|-------------|
+| Entry one[^1]   | Entry two   |
+| Entry three[^2] | Entry four  |
+| Entry five      | Entry six   |
+| Entry seven     | Entry eight |
+
+: An example table with notes {#tbl-notes}
+
+[^1]: This is a footnote
+
+[^2]: This is a second note
+
+The example file also loads the optional `mhchem` package, so that formulas are easy to input: `[H2SO4]{.ce}` gives [H2SO4]{.ce}. See the use in the bibliography file (when using titles in the references section).
+
+The use of new commands should be limited to simple things which will not interfere with the production process. For example, `\textbackslash mycommand` has been defined in this example, to give italic, mono-spaced text: \mycommand{some text}.
+
+## Extra information when writing JACS Communications
+
+When producing communications for *J.\~Am. Chem. Soc.*, the class will automatically lay the text out in the style of the journal. This gives a guide to the length of text that can be accommodated in such a publication. There are some points to bear in mind when preparing a JACS Communication in this way. The layout produced here is a *model* for the published result, and the outcome should be taken as a *guide* to the final length. The spacing and sizing of graphical content is an area where there is some flexibility in the process. You should not worry about the space before and after graphics, which is set to give a guide to the published size. This is very dependant on the final published layout.
+
+You should be able to use the same source to produce a JACS Communication and a normal article. For example, this demonstration file will work with both `type=article` and `type=communication`. Sections and any abstract are automatically ignored, although you will get warnings to this effect.
+
+:::{.acknowledgement}
+
+Please use "The authors thank {{< ldots >}}" rather than "The
+authors would like to thank {{< ldots >}}".
+
+The author thanks Mats Dahlgren for version one of `achemso`,
+and Donald Arseneau for the code taken from `cite` to move
+citations after punctuation. Many users have provided feedback on the
+class, which is reflected in all of the different demonstrations
+shown in this document.
+:::
+
+:::{.suppinfo}
+
+This will usually read something like: "Experimental procedures and
+characterization data for all new compounds. The class will
+automatically add a sentence pointing to the information on-line:
+
+:::
+
+## References
