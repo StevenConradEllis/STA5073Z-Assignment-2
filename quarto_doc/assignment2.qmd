@@ -33,7 +33,7 @@ library(textdata)
 library(tm)
 library(MASS)
 library(topicmodels)
-
+library(knitr)
 ```
 
 
@@ -41,7 +41,7 @@ library(topicmodels)
 set.seed(2023)
 
 # Set working folder to parent folder
-(WD <- getwd())
+WD <- getwd()
 if (!is.null(WD)) setwd(WD)
 setwd('../') 
 
@@ -252,13 +252,12 @@ sona_document_prob <- sona_documents %>%
 ```
 
 
-```{r, echo=FALSE}
+```{r topic.prob, echo=FALSE}
 #| label: tbl-cars
 #| tbl-cap: "President-Per-Topic Probabilities"
 #| tbl-colwidths: [60,20,20]
 
 # display the president per-topic probabilities
-library(knitr)
 kable(sona_document_prob)
 ```
 
