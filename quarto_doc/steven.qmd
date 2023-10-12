@@ -1,3 +1,30 @@
+---
+author:
+  - name: Ropafadzo Chimuti
+    email: CHMROP002@myuct.ac.za
+  - name: Tanweer Nujjoo
+    email: NJJSYE001@myuct.ac.za
+  - name: Steven Ellis
+    email: ELLSTE005@uct.ac.za
+        
+title: A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1994 to 2023
+keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
+abstract: |
+  Summary of motivation and outcome. Start with context, task and object, finish with findings and conclusion. This is written last.
+bibliography: bibliography.bib
+format:
+  acs-html: default
+  acs-pdf:
+    journal:
+      id: jacsat  #This is an identifier for the target journal: from https://pubs.acs.org/, the identifier is the part of the URL after https://pubs.acs.org/journal/, e.g. for J. Org. Chem. it would be joceah.
+      type: article  #article, note, communication, review, letter, or perspectivee
+      layout: traditional #traditional or twocolumn, twocolumn currently broken for longtables
+      hide-email: false # if enabled, hides email addresses (and fax/phone)
+      abbreviations: IR,NMR,UV
+  
+---
+
+```{r libraries, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 library(stringr)
 library(tidyverse)
 library(tidytext)
@@ -6,20 +33,55 @@ library(textdata)
 library(tm)
 library(MASS)
 library(topicmodels)
+library(knitr)
+```
 
+
+```{r extract, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 set.seed(2023)
 
-(WD <- getwd())
+# Set working folder to parent folder
+WD <- getwd()
 if (!is.null(WD)) setwd(WD)
+setwd('../') 
 
 # read in text data files and organise these into a data frame
-filenames <- c('1994_post_elections_Mandela.txt', '1994_pre_elections_deKlerk.txt', '1995_Mandela.txt', '1996_Mandela.txt', '1997_Mandela.txt', '1998_Mandela.txt', 
-               '1999_post_elections_Mandela.txt', '1999_pre_elections_Mandela.txt', '2000_Mbeki.txt', '2001_Mbeki.txt', '2002_Mbeki.txt', '2003_Mbeki.txt', 
-               '2004_post_elections_Mbeki.txt', '2004_pre_elections_Mbeki.txt', '2005_Mbeki.txt', '2006_Mbeki.txt', '2007_Mbeki.txt', '2008_Mbeki.txt', 
-               '2009_post_elections_Zuma.txt', '2009_pre_elections_ Motlanthe.txt', '2010_Zuma.txt', '2011_Zuma.txt', '2012_Zuma.txt', '2013_Zuma.txt', 
-               '2014_post_elections_Zuma.txt', '2014_pre_elections_Zuma.txt', '2015_Zuma.txt', '2016_Zuma.txt', '2017_Zuma.txt', '2018_Ramaphosa.txt', 
-               '2019_post_elections_Ramaphosa.txt', '2019_pre_elections_Ramaphosa.txt', '2020_Ramaphosa.txt', '2021_Ramaphosa.txt', '2022_Ramaphosa.txt', '2023_Ramaphosa.txt')
-
+filenames <- c('1994_post_elections_Mandela.txt', 
+               '1994_pre_elections_deKlerk.txt', 
+               '1995_Mandela.txt', 
+               '1996_Mandela.txt', 
+               '1997_Mandela.txt', '
+               1998_Mandela.txt', 
+               '1999_post_elections_Mandela.txt', 
+               '1999_pre_elections_Mandela.txt', 
+               '2000_Mbeki.txt', 
+               '2001_Mbeki.txt', 
+               '2002_Mbeki.txt', 
+               '2003_Mbeki.txt', 
+               '2004_post_elections_Mbeki.txt', 
+               '2004_pre_elections_Mbeki.txt', 
+               '2005_Mbeki.txt', 
+               '2006_Mbeki.txt', 
+               '2007_Mbeki.txt', 
+               '2008_Mbeki.txt', 
+               '2009_post_elections_Zuma.txt', 
+               '2009_pre_elections_ Motlanthe.txt', 
+               '2010_Zuma.txt', 
+               '2011_Zuma.txt', 
+               '2012_Zuma.txt', 
+               '2013_Zuma.txt', 
+               '2014_post_elections_Zuma.txt', 
+               '2014_pre_elections_Zuma.txt', 
+               '2015_Zuma.txt', 
+               '2016_Zuma.txt', 
+               '2017_Zuma.txt', 
+               '2018_Ramaphosa.txt', 
+               '2019_post_elections_Ramaphosa.txt', 
+               '2019_pre_elections_Ramaphosa.txt', 
+               '2020_Ramaphosa.txt', 
+               '2021_Ramaphosa.txt', 
+               '2022_Ramaphosa.txt', 
+               '2023_Ramaphosa.txt')
 
 this_speech <- c()
 this_speech[1] <- readChar('./sona-addresses-1994-2023/1994_post_elections_Mandela.txt', nchars = 27050)
@@ -86,15 +148,35 @@ sona <-sona %>%
 # Convert to tibble
 sona <- as.tibble(sona)
 
+```
+
+## Introduction
+
+This is the introduction. To cover: what is `SONA` and what is its purpose? What is topic modelling, sentiment analysis and descriptive analysis etc? What was the assignment task? What was the motivation? Why is modelling important?
+
+## Materials and Methods
+
+### DataSet
+
+Summary of data-set and data cleaning methods used. How the data was read in, parsed.
+
+### Sentiment Analysis
+
+Summary of tools used for sentiment analysis (R packages), how data was pre-processed for sentiment analysis, and techniques used.
+
+### Topic Modelling
+
+```{r lda_all, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
 replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;'
 unnest_reg <- "[^\\w_#@'’]"
 
 # turn into tidy text 
 tidy_sona <- sona %>% 
-  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
-  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>% # remove links etx
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   # tokenize
   filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
-  dplyr::select(word, pres, date, filename)            #choose the variables we need 
+  dplyr::select(word, pres, date, filename)  # select variables needed
 
 # Count the number of times each word in our vocabulary was used by each president, 
 # creating a "long" (and tidy) format of the document-term matrix.
@@ -118,7 +200,7 @@ sona_lda <- LDA(dtm_sona, k = 5, control = list(seed = 2023))
 # for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
 sona_topics <- tidy(sona_lda, matrix = "beta")
 
-# Notice that this has turned the model into a one-topic-per-term-per-row format. 
+# The model is now in one-topic-per-term-per-row format. 
 # For each combination, the model computes the probability of that term 
 # being generated from that topic. 
 
@@ -129,7 +211,21 @@ sona_top_terms <- sona_topics %>%
   ungroup() %>%
   arrange(topic, -beta)
 
-# Visualize using ggplot
+```
+
+Summary of topic modelling, LDA. Tools used for LDA (R packages), how data was pre-processed for LDA, and techniques used.
+
+## Results
+
+Results introduction
+
+### Sentiment Analysis
+
+### Topic Modelling
+
+```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Visualize top terms per topic using ggplot
 sona_top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
@@ -137,15 +233,35 @@ sona_top_terms %>%
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
 
-# Examine the per-document-per-topic probabilities, γ (“gamma”), 
+```
+
+
+```{r lda_doc, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Examine the per-president-per-topic probabilities, γ (“gamma”), 
 # with the matrix = "gamma" argument to tidy()
 sona_documents <- tidy(sona_lda, matrix = "gamma")
 
 # Determine which president has the highest gamma score per topic
-sona_documents %>%
+sona_document_prob <- sona_documents %>%
   group_by(topic) %>%
   slice_max(order_by = gamma, n = 1) %>%
   ungroup()
+
+```
+
+
+```{r topic.prob, echo=FALSE}
+#| label: tbl-probs
+#| tbl-cap: "President-Per-Topic Probabilities"
+#| tbl-colwidths: [60,20,20]
+
+# display the president per-topic probabilities
+kable(sona_document_prob)
+```
+
+
+```{r lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
 # Consider the terms that had the greatest difference in β
 # between topic 1 and topic 2, based on the log ratio of the two
@@ -155,121 +271,71 @@ beta_wide <- sona_topics %>%
   filter(topic1 > .001 | topic2 > .001) %>%
   mutate(log_ratio = log2(topic2 / topic1))
 
-# Visualize
-beta_wide %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
-  ungroup() %>%
-  mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
-  geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
-  coord_flip()
-
-
-# Consider the terms that had the greatest difference in β
-# between topic 1 and topic 3, based on the log ratio of the two
 beta_wide2 <- sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
   filter(topic3 > .001 | topic4 > .001) %>%
   mutate(log_ratio = log2(topic4 / topic3))
 
-# Visualize
-beta_wide2 %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
-  ungroup() %>%
-  mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
-  geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 3 / topic 1') +
-  coord_flip()
 
-
-# Consider the terms that had the greatest difference in β
-# between topic 1 and topic 4, based on the log ratio of the two
 beta_wide3 <- sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
   filter(topic4 > .001 | topic5 > .001) %>%
   mutate(log_ratio = log2(topic5 / topic4))
 
+par(mfrow=c(2,2))
+
+# Visualize
+beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(8, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
+  coord_flip()
+
+# Visualize
+beta_wide2 %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(8, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(y = 'Log2 ratio of beta in topic 3 / topic 1') +
+  coord_flip()
+
 # Visualize
 beta_wide3 %>%
   group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
+  top_n(8, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
+  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  theme(legend.position = "none") +
   geom_col() +
   labs(y = 'Log2 ratio of beta in topic 4 / topic 1') +
   coord_flip()
 
+```
 
-
-beta_wide4 <- sona_topics %>%
-  mutate(topic = paste0("topic", topic)) %>%
-  pivot_wider(names_from = topic, values_from = beta) %>% 
-  filter(topic5 > .001 | topic3 > .001) %>%
-  mutate(log_ratio = log2(topic3 / topic5))
-
-# Visualize
-beta_wide4 %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
-  ungroup() %>%
-  mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
-  geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 4 / topic 1') +
-  coord_flip()
-
-
-
-beta_wide5 <- sona_topics %>%
-  mutate(topic = paste0("topic", topic)) %>%
-  pivot_wider(names_from = topic, values_from = beta) %>% 
-  filter(topic5 > .001 | topic2 > .001) %>%
-  mutate(log_ratio = log2(topic2 / topic5))
-
-# Visualize
-beta_wide5 %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(20, abs(log_ratio)) %>%
-  ungroup() %>%
-  mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
-  geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 4 / topic 1') +
-  coord_flip()
-
-
+```{r lda_beta4, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
 ramaphosa_sona <- sona %>% filter(pres == "Ramaphosa")
-zuma_sona <- sona %>% filter(pres == "Zuma")
 
 # turn into tidy text 
 tidy_ramaphosa_sona <- ramaphosa_sona %>% 
-  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
-  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
-  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
-  dplyr::select(word, pres, date, filename)            #choose the variables we need 
-
-
-tidy_zuma_sona <- zuma_sona %>% 
-  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%              #remove stuff we don't want like links
-  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   #tokenize
-  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%
   dplyr::select(word, pres, date, filename) 
 
-
 ramaphosa_sona_tdf <- tidy_ramaphosa_sona %>%
-  group_by(filename,word) %>%
-  count() %>%  
-  ungroup()
-
-zuma_sona_tdf <- tidy_zuma_sona %>%
   group_by(filename,word) %>%
   count() %>%  
   ungroup()
@@ -277,30 +343,17 @@ zuma_sona_tdf <- tidy_zuma_sona %>%
 # Remove common SONA words that are used very regularly, but which don't convey too much meaning
 common_sona_reg <- 'madam|percent|speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
 ramaphosa_sona_tdf <- ramaphosa_sona_tdf %>% filter(!grepl(common_sona_reg, word))
-zuma_sona_tdf <- zuma_sona_tdf %>% filter(!grepl(common_sona_reg, word))
-
 
 dtm_ramaphosa_sona <- ramaphosa_sona_tdf %>% cast_dtm(filename, word, n)
-dtm_zuma_sona <- zuma_sona_tdf %>% cast_dtm(filename, word, n)
 
 # Estimate the parameters of the topic model using LDA
 ramaphosa_sona_lda <- LDA(dtm_ramaphosa_sona, k = 5, control = list(seed = 2023))
-zuma_sona_lda <- LDA(dtm_zuma_sona, k = 4, control = list(seed = 2345))
 
 # Use the tidy() function by the  tidytext package 
 # for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
 ramaphosa_sona_topics <- tidy(ramaphosa_sona_lda, matrix = "beta")
-zuma_sona_topics <- tidy(zuma_sona_lda, matrix = "beta")
-
 
 ramaphosa_sona_top_terms <- ramaphosa_sona_topics %>%
-  group_by(topic) %>%
-  slice_max(beta, n = 20) %>% 
-  ungroup() %>%
-  arrange(topic, -beta)
-
-
-zuma_sona_top_terms <- zuma_sona_topics %>%
   group_by(topic) %>%
   slice_max(beta, n = 20) %>% 
   ungroup() %>%
@@ -313,17 +366,12 @@ ramaphosa_sona_top_terms %>%
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
   scale_y_reordered()
+```
 
-zuma_sona_top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered()
 
+```{r lda_beta5, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
 ramaphosa_sona_documents <- tidy(ramaphosa_sona_lda, matrix = "gamma")
-zuma_sona_documents <- tidy(zuma_sona_lda, matrix = "gamma")
 
 # Determine which president has the highest gamma score per topic
 ramaphosa_sona_documents %>%
@@ -332,11 +380,23 @@ ramaphosa_sona_documents %>%
   ungroup()
 
 
-zuma_sona_documents %>%
-  group_by(topic) %>%
-  slice_max(order_by = gamma, n = 1) %>%
-  ungroup()
 
+ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9)
+
+
+```
+
+```{r ram.prob, echo=FALSE}
+#| label: tbl-ram-probs
+#| tbl-cap: "Ramaphosa-Per-Topic Probabilities"
+#| tbl-colwidths: [60,20,20]
+
+# display the president per-topic probabilities
+kable(ramaphosa_sona_documents)
+```
+
+
+```{r lda_beta6, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
 ramaphosa_beta_wide <- ramaphosa_sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
@@ -356,29 +416,23 @@ ramaphosa_beta_wide %>%
   labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
   coord_flip()
 
+```
 
 
 
-zuma_beta_wide <- zuma_sona_topics %>%
-  mutate(topic = paste0("topic", topic)) %>%
-  pivot_wider(names_from = topic, values_from = beta) %>% 
-  filter(topic2 > .001 | topic3 > .001) %>%
-  mutate(log_ratio = log2(topic3 / topic2))
+## Discussion & Conclusion
 
-# Visualize
-zuma_beta_wide %>%
-  group_by(direction = log_ratio > 0) %>%
-  top_n(10, abs(log_ratio)) %>%
-  ungroup() %>%
-  mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio)) +
-  geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 4 / topic 3') +
-  coord_flip()
+### Sentiment Analysis
+
+### Topic Modelling
+
+### References
+
+The class makes various changes to the way that references are handled. The class loads `natbib`, and also the appropriate bibliography style. References can be made using the normal method; the citation should be placed before any punctuation, as the class will move it if using a superscript citation style [@Garnier2007]. The use of `natbib` allows the use of the various citation commands of that package have shown something. Long lists of authors will be automatically truncated in most article formats, but not in supplementary information or reviews. If you encounter problems with the citation macros, please check that your copy of `natbib` is up to date. The demonstration database file `bibliography.bib` shows how to complete entries correctly.
+
+Multiple citations to be combined into a list can be given as a single citation. This uses the `mciteplus` package. Citations other than the first of the list should be indicated with a star.
+
+The class also handles notes to be added to the bibliography. These should be given in place in the document. As with citations, the text should be placed before punctuation. A note is also generated if a citation has an optional note. This assumes that the whole work has already been cited: odd numbering will result if this is not the case .
 
 
-
-
-
-
-
+## References
