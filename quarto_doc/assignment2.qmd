@@ -119,7 +119,7 @@ this_speech[32] <- readChar('./sona-addresses-1994-2023/2019_pre_elections_Ramap
 this_speech[33] <- readChar('./sona-addresses-1994-2023/2020_Ramaphosa.txt', nchars = 47910)
 this_speech[34] <- readChar('./sona-addresses-1994-2023/2021_Ramaphosa.txt', nchars = 43352)
 this_speech[35] <- readChar('./sona-addresses-1994-2023/2022_Ramaphosa.txt', nchars = 52972)
-this_speech[36] <- readChar('./sona-addresses-1994-2023/2023_Ramaphosa.txt', nchars = 52972)
+this_speech[36] <- readChar('./sona-addresses-1994-2023/2023_Ramaphosa.txt', nchars = 53933)
 
 sona <- data.frame(filename = filenames, speech = this_speech, stringsAsFactors = FALSE)
 sona$speech_year <- str_sub(sona$filename, start = 1, end = 4)
