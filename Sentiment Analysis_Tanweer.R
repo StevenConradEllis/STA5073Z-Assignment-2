@@ -374,7 +374,7 @@ overall_common_positive_words <- sona %>%
   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
   ggtitle("Top 20 positive words used by all presidents") +
   theme(plot.title = element_text(size = 11), legend.position = '')+
-  scale_fill_gradient(low = "black", high = "grey")
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
   
 # Most common negative words used by all presidents -----------------------
 overall_common_negative_words <- sona %>% 
@@ -391,7 +391,7 @@ overall_common_negative_words <- sona %>%
   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
   ggtitle("Top 20 negative words used by all presidents") +
   theme(plot.title = element_text(size = 11), legend.position = '')+
-  scale_fill_gradient(low = "black", high = "grey")
+  scale_fill_gradient(low = "red", high = "pink")
 
 
 # combining above plots in one figure
@@ -565,11 +565,18 @@ overall_word_bing_sentiment_change_over_time <- sona %>%
   geom_col(fill = 'springgreen') + 
   geom_col(data=. %>% filter(bing_sentiment_pos_minus_neg<0), fill = 'red') +
   xlab('Year') + ylab('Sentiment') +
-  ggtitle("Fluctuation in the positive and negative sentiment of all presidents over the years") +
   theme(plot.title = element_text(size = 11)) +
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
-
-
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_rect(aes(xmin = 1 - 0.5, xmax = 6 + 0.5, ymin = -5, ymax = 103),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = 'dashed') + annotate(geom="text", x=1.15, y= 5+103, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 - 0.5, xmax = 15 + 0.5, ymin = 0, ymax = 183),
+            fill = "transparent", color = "steelblue", size = .05, linetype = 'dashed') + annotate(geom="text", x=7, y= 5+183, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16 - 0.5, xmax = 24 + 0.5, ymin = 0, ymax = 108),
+            fill = "transparent", color = "magenta4", size = .05, linetype = 'dashed') + annotate(geom="text", x=16, y=5+108, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25 - 0.5, xmax = 30 + 0.5, ymin = 0, ymax = 215),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = 'dashed') + annotate(geom="text", x=25+.3, y=5+215, label="Ramaphosa",color="darkgreen", size = 3) 
+  
+  
 overall_pos_neg_fluctuation <- sona %>% 
   unnest_tokens(word, speech, token = 'words') %>%
   filter(str_detect(word, '[a-z]')) %>% 
@@ -583,17 +590,108 @@ overall_pos_neg_fluctuation <- sona %>%
   ggplot(aes(x = year, y = n, colour = bing_sentiment, group = bing_sentiment)) + 
   geom_line() +
   scale_colour_manual(values = c("positive" = "springgreen", "negative" = "red")) +
-  geom_smooth(linewidth = 0.5, alpha = 0.2, level = 0.6) +
+  geom_smooth(linewidth = 0.2, alpha = 0.2, level = 0.6) +
   ylab('Count') +
   xlab('Year') +
   theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'bottom') +
-  labs(color = '')
+  labs(color = '') +
+  geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 460),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = 'dashed') + annotate(geom="text", x=1+.5, y=13+460, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 390),
+            fill = "transparent", color = "steelblue", size = .05, linetype = 'dashed') + annotate(geom="text", x=7+.5, y=13+390, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16, xmax = 24, ymin = 0, ymax = 300),
+            fill = "transparent", color = "magenta4", size = .05, linetype = 'dashed') + annotate(geom="text", x=16+.5, y=13+300, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25, xmax = 30, ymin = 0, ymax = 560),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = 'dashed') + annotate(geom="text", x=25+.8, y=13+560, label="Ramaphosa",color="darkgreen", size = 3) 
+  
+
+# combining above plots in one figure
+cowplot::plot_grid(overall_word_bing_sentiment_change_over_time, overall_pos_neg_fluctuation,
+                   nrow = 2, ncol = 1, labels = "AUTO", label_size = 10, label_x = 0)
+
+
+# Most common positive trigrams used by all presidents --------------------
+
+bing_word1 <- bing %>%
+  mutate(word1 = word) %>% select(-1)
+bing_word2 <- bing %>%
+  mutate(word2 = word) %>% select(-1)
+bing_word3 <- bing %>%
+  mutate(word3 = word) %>% select(-1)
+
+overall_common_positive_trigrams <- sona %>% 
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by all presidents") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
 
 
 
+overall_common_negative_trigrams <- sona %>% 
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by all presidents") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "red", high = "pink")
 
 
-
-
+# combining above plots in one figure
+cowplot::plot_grid(overall_common_positive_trigrams, overall_common_negative_trigrams,
+                   nrow = 2, ncol = 1, labels = "AUTO", label_size = 10, label_x = 0)
 
 
