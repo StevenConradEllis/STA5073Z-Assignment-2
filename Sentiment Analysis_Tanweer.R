@@ -1,5 +1,5 @@
 # DS4I GROUP ASSIGNMENT 2
-rm(list= ls())
+#rm(list= ls())
 
 library(stringr)
 library(tidyverse)
