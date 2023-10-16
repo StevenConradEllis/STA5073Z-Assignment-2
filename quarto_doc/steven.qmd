@@ -11,7 +11,7 @@ title: A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1
 keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
 abstract: |
   Summary of motivation and outcome. Start with context, task and object, finish with findings and conclusion. This is written last.
-bibliography: bibliography.bib
+bibliography: bibliography-steven.bib
 format:
   acs-html: default
   acs-pdf:
@@ -50,8 +50,8 @@ filenames <- c('1994_post_elections_Mandela.txt',
                '1994_pre_elections_deKlerk.txt', 
                '1995_Mandela.txt', 
                '1996_Mandela.txt', 
-               '1997_Mandela.txt', '
-               1998_Mandela.txt', 
+               '1997_Mandela.txt',
+               '1998_Mandela.txt', 
                '1999_post_elections_Mandela.txt', 
                '1999_pre_elections_Mandela.txt', 
                '2000_Mbeki.txt', 
@@ -223,6 +223,35 @@ Results introduction
 
 ### Topic Modelling
 
+Topic modelling is a machine learning technique that scans tokens (usually words) in sequences (usually documents), with the aim of detecting word and phrase patterns within the sequences. This is achieved by clustering word groups and similar expressions together into ‘topics’ that best characterize a set of documents. [@Pascual2019]
+
+Topic models can help offer insights into bodies of text, for better understanding of large collections of unstructured text bodies. [@Blei2012]
+
+In this assignment topic modelling was performed as follows:
+
+From the pre-generated tibble the following commonly-used words were removed from SONA speeches: `speaker, madame, honourable, chairperson, development, national`, `ensure, deputy, africa, african, africans, south, southern`, `government, people, programme, economic, economy, country`
+
+A data-set of terms that appeared in a resulting corpus of speeches was then extracted into a **document-term matrix**, containing rows corresponding to the speeches and columns corresponding to the words.
+
+The **Latent Dirichlet allocation (LDA)** method was then used to extract topics from the sparse and wide document-term matrix. 
+The LDA algorithm is guided by two principles:
+
+* Every document is a mixture of *topics* (for example 90% topic A and 10% topic B) and every topic is a mixture of *words*. 
+* Every topic is a probability distribution over words.  
+
+LDA draws topic distributions from a Dirichlet distribution and uses variational expectation maximisation algorithm, and collapsed Gibbs sampling (both beyond the scope of this assignment) to achieve topic model estimations.
+
+The **LDA()** function from the `topicmodels` package was used to retrieve LDA topic models.
+
+Latent Dirichlet allocation Topic modelling was performed in the following way:
+
+* The top 5 topics were retrieved across all speeches (to retrieve president-specific topics). 
+* The `tidytext` package was then used to extract **per-topic-per-word probabilities** (the "beta") from the model.
+* The **per-president-per-topic probabilities** (the "gamma") were then extracted using the `tidytext` package.
+* The log ratio of beta values of topics for different presidents were compared to reveal words with the greatest differences between the two presidents' topics.
+* Finally, the speeches of Ramaphosa were retrieved, and the same exercise was repeated for Ramaphosa-specific speeches (to gain insights into the topics that permeated his speeches over the years).
+
+
 ```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
 # Visualize top terms per topic using ggplot
@@ -231,6 +260,7 @@ sona_top_terms %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
+  labs(title = "Figure 1 : Top terms per LDA-generated topic - All Presidential Speeches") +
   scale_y_reordered()
 
 ```
@@ -245,11 +275,21 @@ sona_documents <- tidy(sona_lda, matrix = "gamma")
 # Determine which president has the highest gamma score per topic
 sona_document_prob <- sona_documents %>%
   group_by(topic) %>%
-  slice_max(order_by = gamma, n = 1) %>%
-  ungroup()
+  slice_max(order_by = round(gamma, 3), n = 1) %>%
+  ungroup() %>% 
+  mutate(gamma = round(gamma, 3))
+
+colnames(sona_document_prob) <- c("President", "Topic", "Gamma")
+
+# Summarise the topic gamma values, and example words per topic
+topic_names <- c("Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5")
+topic_presidents <- c("deKlerk", "Mandela", "Mbeki", "Ramaphosa", "Zuma")
+topic_words <- c("constitution, change, improve, parliament, create", "nation, build, human, crime, job, address", "system, world, growth, poverty, challenge", "business, investment, build, growth, improve", "compratriot, water, education, community, plan")
+
+sona_topic_summary <- cbind(topic_names, topic_presidents, topic_words)
+colnames(sona_topic_summary) <- c("Topic", "President", "Example Words")
 
 ```
-
 
 ```{r topic.prob, echo=FALSE}
 #| label: tbl-probs
@@ -260,24 +300,37 @@ sona_document_prob <- sona_documents %>%
 kable(sona_document_prob)
 ```
 
+From the LDA topic modelling on all speeches, there is a clear probalistic relationship between top 5 topics and which president each topic relates to.
+
+```{r topic.summary, echo=FALSE}
+#| label: tbl-topic-summary
+#| tbl-cap: "Topic Summaries"
+#| tbl-colwidths: [20,20, 60]
+
+kable(sona_topic_summary)
+```
+
+### A comparison of word differences between presidents 
+
+The comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challanges each faced.
 
 ```{r lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
-# Consider the terms that had the greatest difference in β
-# between topic 1 and topic 2, based on the log ratio of the two
+# beta comparison of topic 1 and topic 2
 beta_wide <- sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
   filter(topic1 > .001 | topic2 > .001) %>%
   mutate(log_ratio = log2(topic2 / topic1))
 
+# beta comparison of topic 3 and topic 4
 beta_wide2 <- sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
   filter(topic3 > .001 | topic4 > .001) %>%
   mutate(log_ratio = log2(topic4 / topic3))
 
-
+# beta comparison of topic 4 and topic 5
 beta_wide3 <- sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
@@ -286,43 +339,71 @@ beta_wide3 <- sona_topics %>%
 
 par(mfrow=c(2,2))
 
-# Visualize
+# Visualize first beta
 beta_wide %>%
   group_by(direction = log_ratio > 0) %>%
   top_n(8, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
+  labs(title = 'Figure 2: Log2 ratio of beta in topic 2 (Mandela) / topic 1 (deKlerk)', y = 'Log ratio difference', x = 'Term') +
   coord_flip()
 
-# Visualize
+```
+
+The difference in beta (per-topic-word probabilities) between **Mandela** and **deKlerk** reveal some interesting insights into their respective tenures. 
+
+deKlerk made a single speech just before the 1994 democratic elections, expressing hope and optimism for a cohesive and cooperative future between all South Africans. 
+Mandela, by contrast, presided over South Africa for the first 5 years of its nascent democracy, and had to grapple and confront many of the social and economic challenges that it presented.
+
+The log ratios between both presidents' topic beta's is very low compared to other subsequent beta comparisons, however, suggesting much commonality in the topics they confronted and perhaps also their writing styles.
+  
+```{r lda_beta2, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Visualize the second beta
 beta_wide2 %>%
   group_by(direction = log_ratio > 0) %>%
   top_n(8, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 3 / topic 1') +
+  labs(title = 'Figure 3: Log2 ratio of beta topic 3 (Mbeki) / topic 4 (Ramaphosa', y = 'Log ratio difference', x = 'Term') +
   coord_flip()
 
-# Visualize
+```
+
+A comparison of the words with greatest differences between **Mbeki** and **Ramaphosa** reveal how they dealt with very different agendas during their respective tenures. 
+
+Mbeki presided over the hosting of the 2010 FIFA World Cup (`soccer`, `cup`) whilst Ramaphosa had to deal with a global pandemic in 2020-2021 (`covid`, `pandemic`, `restore`) as well as the Eskom electricity crisis which had started already before his presidency (`shed`, `SOEs`, `restore`). 
+
+On a side note, Mbeki appeared to be very fond of the phrase `"discharge their responsibilities"` which is why the word `discharge` stands out in the comparison.
+
+
+```{r lda_beta3, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Visualize the third beta
 beta_wide3 %>%
   group_by(direction = log_ratio > 0) %>%
   top_n(8, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 4 / topic 1') +
+  labs(title = 'Figure 4: Log2 ratio of beta topic 4 (Ramaphosa) / topic 5 (Zuma', y = 'Log ratio difference', x = 'Term') +
   coord_flip()
 
 ```
+
+A comparison of the words with greatest differences between **Ramaphosa** and **Zuma** reveal differences in their presidential styles. 
+
+Terms like `friend` and `compatriot` by Zuma's indicate his reliance on left-wing populist rhetoric in his speeches, whilst the use of terms like `SOEs` and `capture` by Ramaphosa suggest that Zuma did not adequately confront the issues of corruption and inefficiencies in state-owned-enterprises (including Eskom) that beset the legacy of his presidency (and which formed the basis of Ramaphosa's subsequent challenges).
+
+### Topic modelling against Ramaphosa's speeches
 
 ```{r lda_beta4, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -341,13 +422,13 @@ ramaphosa_sona_tdf <- tidy_ramaphosa_sona %>%
   ungroup()
 
 # Remove common SONA words that are used very regularly, but which don't convey too much meaning
-common_sona_reg <- 'madam|percent|speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+common_sona_reg <- 'wanna|madam|percent|speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
 ramaphosa_sona_tdf <- ramaphosa_sona_tdf %>% filter(!grepl(common_sona_reg, word))
 
 dtm_ramaphosa_sona <- ramaphosa_sona_tdf %>% cast_dtm(filename, word, n)
 
 # Estimate the parameters of the topic model using LDA
-ramaphosa_sona_lda <- LDA(dtm_ramaphosa_sona, k = 5, control = list(seed = 2023))
+ramaphosa_sona_lda <- LDA(dtm_ramaphosa_sona, k = 4, control = list(seed = 2023))
 
 # Use the tidy() function by the  tidytext package 
 # for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
@@ -360,12 +441,13 @@ ramaphosa_sona_top_terms <- ramaphosa_sona_topics %>%
   arrange(topic, -beta)
 
 # Visualize using ggplot
-ramaphosa_sona_top_terms %>%
-  mutate(term = reorder_within(term, beta, topic)) %>%
-  ggplot(aes(beta, term, fill = factor(topic))) +
-  geom_col(show.legend = FALSE) +
-  facet_wrap(~ topic, scales = "free") +
-  scale_y_reordered()
+#ramaphosa_sona_top_terms %>%
+#  mutate(term = reorder_within(term, beta, topic)) %>%
+#  ggplot(aes(beta, term, fill = factor(topic))) +
+#  geom_col(show.legend = FALSE) +
+#  facet_wrap(~ topic, scales = "free") +
+#  labs(title = "Figure 5 : Top terms per LDA-generated topic - Ramaphosa Speeches") +
+#  scale_y_reordered()
 ```
 
 
@@ -379,10 +461,7 @@ ramaphosa_sona_documents %>%
   slice_max(order_by = gamma, n = 1) %>%
   ungroup()
 
-
-
-ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9)
-
+ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9) %>% mutate(gamma = round(gamma, 3))
 
 ```
 
@@ -392,7 +471,7 @@ ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9)
 #| tbl-colwidths: [60,20,20]
 
 # display the president per-topic probabilities
-kable(ramaphosa_sona_documents)
+# kable(ramaphosa_sona_documents)
 ```
 
 
@@ -401,8 +480,8 @@ kable(ramaphosa_sona_documents)
 ramaphosa_beta_wide <- ramaphosa_sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
   pivot_wider(names_from = topic, values_from = beta) %>% 
-  filter(topic5 > .001 | topic1 > .001) %>%
-  mutate(log_ratio = log2(topic1 / topic5))
+  filter(topic4 > .001 | topic3 > .001) %>%
+  mutate(log_ratio = log2(topic3 / topic4))
 
 # Visualize
 ramaphosa_beta_wide %>%
@@ -410,14 +489,20 @@ ramaphosa_beta_wide %>%
   top_n(10, abs(log_ratio)) %>%
   ungroup() %>%
   mutate(term = reorder(term, log_ratio)) %>%
-  ggplot(aes(term, log_ratio, fill = log_ratio)) +
+  ggplot(aes(term, log_ratio, fill = "#478aca")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(y = 'Log2 ratio of beta in topic 2 / topic 1') +
+  labs(title = 'Figure 5: Log2 ratio of beta in 2019 post-election speech / 2023 speech', y = 'Log ratio difference', x = 'Term') +
   coord_flip()
 
 ```
 
+We end the section of topic modelling with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023**. 
+Terms in 2019 include `dream`, `comfort`, `bold` and `NDP` (the *National Development Plan*, initiated in 2013, which aims to eliminate poverty and reduce inequality by 2030).
+
+Terms in the 2023 include `pandemic`, `disaster`, `overcome`, `transition`, and tellingly, not a single mention of the *National Development Plan*. 
+
+This suggests the use of optimistic and idealistic terms during an election year that support a political agenda, that is not evident in non-election years. 
 
 
 ## Discussion & Conclusion
@@ -425,6 +510,8 @@ ramaphosa_beta_wide %>%
 ### Sentiment Analysis
 
 ### Topic Modelling
+
+Topic modelling against presidential speeches revealed a powerful tool for helping gain insight into themes and topics or speeches across presidents and over time. Topics between presidents revealed a lot of similarity in terms of common words and a general theme of progress, development, investment etc. (which is typical in every presidential state-of-the-nation speech), but subtle topic and word differences revealed interesting insights that prompted further analysis of individual speeches and presidents.  
 
 ### References
 
