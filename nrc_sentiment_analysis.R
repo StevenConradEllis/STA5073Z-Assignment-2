@@ -1,3 +1,4 @@
+rm(list= ls())
 
 library(stringr)
 library(tidyverse)
@@ -17,8 +18,8 @@ filenames <- c('1994_post_elections_Mandela.txt',
                '1994_pre_elections_deKlerk.txt', 
                '1995_Mandela.txt', 
                '1996_Mandela.txt', 
-               '1997_Mandela.txt', '
-               1998_Mandela.txt', 
+               '1997_Mandela.txt',
+               '1998_Mandela.txt', 
                '1999_post_elections_Mandela.txt', 
                '1999_pre_elections_Mandela.txt', 
                '2000_Mbeki.txt', 
@@ -93,7 +94,7 @@ this_speech[36] <- readChar('https://raw.githubusercontent.com/iandurbach/datasc
 sona <- data.frame(filename = filenames, speech = this_speech, stringsAsFactors = FALSE)
 
 # extract year and president for each speech
-sona$speech_year <- str_sub(sona$filename, start = 1, end = 4)
+sona$year <- str_sub(sona$filename, start = 1, end = 4)
 sona$pres <- str_remove_all(str_extract(sona$filename, "[dA-Z].*\\."), "\\.")
 
 # clean the sona dataset by adding the date and removing unnecessary text
@@ -127,12 +128,12 @@ tidy_sona <- sona %>%
   mutate(speech = str_replace_all(speech, replace_reg, '')) %>% # remove links etx
   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   # tokenize
   filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
-  dplyr::select(word, pres, date, filename)  # select variables needed
+  dplyr::select(word, pres, date, filename,year)  # select variables needed
 
 # Count the number of times each word in our vocabulary was used by each president, 
 # creating a "long" (and tidy) format of the document-term matrix.
 sona_tdf <- tidy_sona %>%
-  group_by(pres,date,word) %>%
+  group_by(pres,year,word,date) %>%
   count() %>%  
   ungroup()
 
@@ -229,14 +230,15 @@ sona_tdf  <- sona_tdf  %>%
   filter(!pres %in% c('deKlerk', 'Motlanthe')) # excluding 1 time president
 unique(sona_tdf$pres) # dealing with 4 presidents now
 
-
+#nrc over time 
 emotion_change_over_time <- sona_tdf %>%
   left_join(nrc, by = "word") %>%
   mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
   filter(sentiment != "neutral")%>%
-  group_by(date, sentiment) %>%
-  summarize(n = n()) %>%
-  mutate(year = str_sub(date, start=7, end=10)) %>% 
+  group_by(sentiment,year) %>%
+  summarize(n = n()) 
+
+emotion_change_over_time <-emotion_change_over_time%>%
   left_join(emotion_change_over_time %>% 
               group_by(year) %>% 
               summarise(total = sum(n))) %>%
@@ -244,10 +246,90 @@ emotion_change_over_time <- sona_tdf %>%
 
 emotion_change_over_time %>%
   ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() +
+  geom_smooth(aes(colour = sentiment)) + ylab("frequency") + xlab("year")+
+  ggtitle("Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))
+ 
+#individual president sentiment change  over time
+mandela_emotion_change_over_time <- mandela_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,year) %>%
+  summarize(n = n())
+
+mandela_emotion_change_over_time <-mandela_emotion_change_over_time%>%
+  left_join(mandela_emotion_change_over_time %>% 
+              group_by(year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
+
+mandela_emotion_change_over_time %>%
+  ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
   geom_line() + 
-  geom_smooth(aes(colour = sentiment))
+  geom_smooth(aes(colour = sentiment))+ ylab("frequency") + xlab("year")+
+  ggtitle("Mandela Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))
 
+mbeki_emotion_change_over_time <- mbeki_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,year) %>%
+  summarize(n = n())
 
+mbeki_emotion_change_over_time <-mbeki_emotion_change_over_time%>%
+  left_join(mbeki_emotion_change_over_time %>% 
+              group_by(year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
 
+mbeki_emotion_change_over_time %>%
+  ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() + 
+  geom_smooth(aes(colour = sentiment))+ ylab("frequency") + xlab("year")+
+  ggtitle("Mbeki Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))
 
+zuma_emotion_change_over_time <- zuma_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,year) %>%
+  summarize(n = n())
 
+zuma_emotion_change_over_time <-zuma_emotion_change_over_time%>%
+  left_join(zuma_emotion_change_over_time %>% 
+              group_by(year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
+
+zuma_emotion_change_over_time %>%
+  ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() + 
+  geom_smooth(aes(colour = sentiment))+ ylab("frequency") + xlab("year")+
+  ggtitle("Zuma Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))
+
+ramaphosa_emotion_change_over_time <- ramaphosa_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,year) %>%
+  summarize(n = n())
+
+ramaphosa_emotion_change_over_time <-ramaphosa_emotion_change_over_time%>%
+  left_join(ramaphosa_emotion_change_over_time %>% 
+              group_by(year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
+
+ramaphosa_emotion_change_over_time %>%
+  ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() + 
+  geom_smooth(aes(colour = sentiment))+ ylab("frequency") + xlab("year")+
+  ggtitle("Ramaphosa Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))
+
+ 
