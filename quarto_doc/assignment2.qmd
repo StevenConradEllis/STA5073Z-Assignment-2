@@ -160,7 +160,14 @@ sona <- as.tibble(sona)
 
 # Introduction
 
-This is the introduction. To cover: what is `SONA` and what is its purpose? What is topic modelling, sentiment analysis and descriptive analysis etc? What was the assignment task? What was the motivation? Why is modelling important?
+The State of the Nation Address (SONA) is a crucial annual event in the political landscape of South Africa. It serves as a comprehensive summary of the nation's current status and a roadmap for its future. The address, delivered by the country's highest-ranking official, outlines achievements, priorities, and strategies for the upcoming year, significantly influencing policy, legislation, and public discourse.
+
+This research paper, undertakes a comprehensive descriptive examination of the content within South African State of the Nation Addresses (SONAs), employing advanced techniques in sentiment analysis and topic modeling. Sentiment analysis allows for the extraction and quantification of emotional and attitudinal tones within the speeches, providing deeper insights into the language used by leaders to engage, motivate, and influence their audience. Understanding prevailing sentiments also offers valuable context for assessing the reception and impact of the SONA.
+
+Furthermore, topic modeling enables the categorization of the diverse subjects addressed within these speeches. This approach clarifies the key areas of government focus and the shifting priorities as they evolve over time. It not only aids in identifying primary trends but also provides a quantitative basis for comparisons between different presidencies.
+
+A comprehensive explanation of sentiment analysis and topic modeling, including a breakdown of their methodologies and an examination of the results as applied to the analysis of South African SONAs, are presented in relevant sections within this report. 
+
 
 # Materials and Methods
 
@@ -168,7 +175,8 @@ This section describes thoroughly the procedures undertaken to conduct a descrip
 
 ## Brief Overview of SONA dataset
 
-*Ropa's section*
+The dataset used in this study comprised of speeches obtained from various text files, each of differing sizes. These speeches were presented in a semi-formal structure, with a common characteristic being the inclusion of the date of delivery at the beginning. 
+The data was not inherently structured in a manner conducive to automated tabulation and analysis. Therefore, preprocessing steps were necessary to facilitate subsequent analysis. Detailed information regarding the preprocessing procedures is provided in the following section.
 
 
 ## Data Pre-processing & Cleaning
@@ -212,7 +220,35 @@ The `bing` dictionary was loaded from the `tidytext` library. Each of the 6786 w
 
 A more in-depth sentiment analysis was performed by aggregating the above per president. The exact methods explained in the above paragraph were implemented with the exception that the presidents were first filtered in that same procedural pipeline. It was also vital to investigate the variation of positive and negative sentiments over the years while excluding deKlerk and Motlanthe as they were only 1-term presidents. Those investigations were done for the trigrams by following the procedure as described in @sec-PreliminaryProcedure2 and then plotted as barplots and line graphs. The only key aspect here was to group the sentiment and year before counting how many positive and negative sentiments were recorded per year. 
 
-*Ropa: nrc dictionary descriptions*
+This report also employed the **NRC Emotion Lexicon** for sentimental analysis, a resource that associates English words with eight fundamental emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust), along with two sentiments (negative and positive). 
+This lexicon was used to analyse the emotions expressed in presidential speeches, providing insights into the emotional aspects of their leadership and communication.
+
+```{r nrc-cleaning, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;'
+unnest_reg <- "[^\\w_#@'’]"
+
+# tidy text 
+nrc_tidy_sona <- sona %>% 
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>% # remove links etx
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   # tokenize
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
+  dplyr::select(word, pres, date, filename, speech_year)  # select variables needed
+
+# Count the number of times each word in our vocabulary was used by each president, 
+# creating a "long" (and tidy) format of the document-term matrix.
+nrc_sona_tdf <- nrc_tidy_sona %>%
+  group_by(pres,speech_year,word,date) %>%
+  count() %>%  
+  ungroup()
+
+# Remove common SONA words that are used very regularly, but which don't convey too much meaning
+common_sona_reg <- 'speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+nrc_sona_tdf <- nrc_sona_tdf %>% filter(!grepl(common_sona_reg, word))
+
+
+```
+
 
 ```{r Main data cleaning, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -249,11 +285,9 @@ Topic models can help offer insights into bodies of text, for better understandi
 
 In this assignment topic modelling was performed as follows:
 
-From the pre-generated tibble the following commonly-used words were removed from SONA speeches: `speaker, madame, honourable, chairperson, development, national`, `ensure, deputy, africa, african, africans, south, southern`, `government, people, programme, economic, economy, country`
+A data-set of words that appeared in the corpus of presidential speeches was extracted into a **document-term matrix**, containing rows corresponding to the speeches and columns corresponding to the words.
 
-A data-set of terms that appeared in a resulting corpus of speeches was then extracted into a **document-term matrix**, containing rows corresponding to the speeches and columns corresponding to the words.
-
-The **Latent Dirichlet allocation (LDA)** method was then used to extract topics from the sparse and wide document-term matrix. 
+The **Latent Dirichlet allocation (LDA)** method was then used to extract topics from this sparse and wide document-term matrix. 
 The LDA algorithm is guided by two principles:
 
 * Every document is a mixture of *topics* (for example 90% topic A and 10% topic B) and every topic is a mixture of *words*. 
@@ -319,12 +353,9 @@ sona_top_terms <- sona_topics %>%
 
 ```
 
-Summary of topic modelling, LDA. Tools used for LDA (R packages), how data was pre-processed for LDA, and techniques used.
-
 
 # Results & Discussions
 
-*Results introduction*
 
 ## Overall Analysis
 
@@ -1256,6 +1287,46 @@ cowplot::plot_grid(overall_trigram_bing_sentiment_change_over_time, overall_pos_
 
 ```
 
+```{r nrc_overtime, echo=FALSE, eval=TRUE,warning=FALSE, out.width="80%",message=FALSE,fig.cap="Evolution of emotions expressed over time from 1994-2023 by all presidents"}
+# removing deKlerk and Motlanthe from the analysis as they made only 1 speech
+nrc_sona_tdf  <- nrc_sona_tdf  %>%
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) # excluding 1 time president
+
+#nrc over time 
+emotion_change_over_time <- nrc_sona_tdf %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,speech_year) %>%
+  summarize(n = n()) 
+
+emotion_change_over_time <-emotion_change_over_time%>%
+  left_join(emotion_change_over_time %>% 
+              group_by(speech_year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
+
+emotion_change_over_time %>%
+  ggplot(aes(x = speech_year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() +
+  geom_smooth(aes(colour = sentiment)) + ylab("frequency") + xlab("year")+
+  ggtitle("Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))+ 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "deeppink3", size = .05 , linetype = '8f') + ggplot2::annotate(geom="text", x=1+.5, y=0.31, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7+.5, y=0.31, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16, xmax = 24, ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16+.5, y=0.31, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25, xmax = 30, ymin = 0, ymax =0.3),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25+.8, y=0.31, label="Ramaphosa",color="darkgreen", size = 3)
+ 
+```
+
+In Figure 3, we observe the evolution of emotional dynamics over time. Notably, there is a distinct upswing in the expression of positive emotions, particularly from 2009 when President Zuma assumed office. This trend potentially signifies President Zuma's leadership style, which may have prioritized positivity, unity, and motivation. Alternatively, it could imply that his speeches served as a means of crisis management, offering reassurance to the public and reinforcing the notion of stability and control during challenging times. We can observe a significant increase in negative emotions during the time frame spanning 2021 to 2023, marked notably by heightened expressions of fear and sadness. This trend can be traced back to the profound global impact of the novel coronavirus, which affected nations worldwide in 2020.
+
+
 ## Topic Modelling
 
 ```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
@@ -1297,9 +1368,6 @@ colnames(sona_topic_summary) <- c("Topic", "President", "Example Words")
 
 ```
 
-
-
-
 ```{r topic.prob, echo=FALSE}
 #| label: tbl-probs
 #| tbl-cap: "President-Per-Topic Probabilities"
@@ -1309,7 +1377,7 @@ colnames(sona_topic_summary) <- c("Topic", "President", "Example Words")
 kable(sona_document_prob)
 ```
 
-From the LDA topic modelling on all speeches, there is a clear probalistic relationship between top 5 topics and which president each topic relates to.
+From the LDA topic modelling on all speeches, there is a clear probabilistic relationship between top 5 topics and which president each topic relates to.
 
 ```{r topic.summary, echo=FALSE}
 #| label: tbl-topic-summary
@@ -1319,9 +1387,7 @@ From the LDA topic modelling on all speeches, there is a clear probalistic relat
 kable(sona_topic_summary)
 ```
 
-### A comparison of word differences between presidents 
-
-The comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challanges each faced.
+The comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challenges each faced.
 
 ```{r lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -1412,7 +1478,7 @@ A comparison of the words with greatest differences between **Ramaphosa** and **
 
 Terms like `friend` and `compatriot` by Zuma's indicate his reliance on left-wing populist rhetoric in his speeches, whilst the use of terms like `SOEs` and `capture` by Ramaphosa suggest that Zuma did not to any same degree confront the issues of corruption and inefficiencies in state-owned-enterprises (including Eskom) that beset the legacy of his presidency (and which formed the basis of Ramaphosa's subsequent challenges).
 
-### Topic modelling against Ramaphosa's speeches
+
 
 ```{r lda_beta4, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -1506,7 +1572,7 @@ ramaphosa_beta_wide %>%
 
 ```
 
-We end the section of topic modelling with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023**. 
+The section of topic modelling is ended with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023**. 
 
 Terms in 2019 included `dream`, `comfort`, `bold` and `NDP` (the *National Development Plan*, initiated in 2013, which aims to eliminate poverty and reduce inequality by 2030).
 
@@ -1515,11 +1581,36 @@ Terms in the 2023 included `pandemic`, `disaster`, `overcome`, `transition`, and
 This suggests the use of optimistic and idealistic terms during an election year that support a political agenda, that is not evident in non-election years. 
 
 
+
+## Review: Using ChatGPT as a Large Language Model
+
+Large Language Models (LLMs) are sophisticated artificial intelligence tools that assist with numerous tasks, such as compiling, processing, and writing reports, such as this one. ChatGPT, in particular, has shown remarkable capabilities in assisting with such tasks, and so it was used to assist with completing this task and the following is a detailed review of the experience.
+
+#### **Prompting for Writing:**
+
+When it came to the writing process, ChatGPT excelled when it was provided with detailed descriptions of what was required, often in concise bullet points. This structured approach allowed ChatGPT to address each point systematically. While it usually produced well-structured and coherent content, minor human adjustments were occasionally necessary for optimal results.
+
+Its performance deteriorated when clear and detailed instructions were not provided. In such cases, the results were less satisfactory, very generalized and often necessitated additional prompting or fine-tuning.
+
+#### **Prompting for Coding:**
+
+In the realm of coding, ChatGPT proved to be a valuable resource for understanding and debugging errors. When presented with coding errors, it demonstrated an impressive accuracy rate of identifying the root cause of the issue.
+
+Furthermore, for simpler or common coding exercises, ChatGPT typically provided effective solutions on the first attempt. However, it's with more complex coding problems, even when prompts were tuned, ChatGPT struggled to produce correct answers. This is perhaps indicative of the limitations of current AI models in handling intricate coding challenges.
+
+#### **Prompting for Facts and Definitions:**
+
+ChatGPT delivered accurate facts and definitions when prompted. However, due diligence remained essential, as the information provided was cross-checking for precision.
+
+One remarkable aspect of ChatGPT was its ability to explain topics comprehensively, providing definitions that allowed for a solid understanding of the subject matter. It excelled in generating examples and rephrasing information in simpler terms, which greatly aided in achieving a clear and thorough comprehension of the topics it addressed.
+
+In summary, ChatGPT has proven to be a valuable tool for a variety of tasks, particularly in the realm of report compilation, coding assistance, and knowledge provision. While it excels with well-defined and detailed prompts, its limitations become apparent when instructions are less clear or when confronted with intricate coding challenges. Nevertheless, ChatGPT's capabilities in simplifying complex concepts and generating good quality written content offer significant value in a variety of applications.
+
+
+
 # Conclusions
 
-### Sentiment Analysis
 
-### Topic Modelling
 
 
 # References
