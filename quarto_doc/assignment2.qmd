@@ -11,16 +11,24 @@ title: A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1
 keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
 abstract: |
   Summary of motivation and outcome. Start with context, task and object, finish with findings and conclusion. This is written last.
-bibliography: bibliography.bib
+bibliography: bibliography_Tanweer.bib
 format:
-  acs-html: default
-  acs-pdf:
-    journal:
-      id: jacsat  #This is an identifier for the target journal: from https://pubs.acs.org/, the identifier is the part of the URL after https://pubs.acs.org/journal/, e.g. for J. Org. Chem. it would be joceah.
-      type: article  #article, note, communication, review, letter, or perspectivee
-      layout: traditional #traditional or twocolumn, twocolumn currently broken for longtables
-      hide-email: false # if enabled, hides email addresses (and fax/phone)
-      abbreviations: IR,NMR,UV
+   acs-html: default
+   acs-pdf: 
+       toc: true
+       number-sections: true
+       extra_dependencies: ["float"]
+       header-includes:
+            - \usepackage{hyperref}
+            - \usepackage{graphicx}
+            - \usepackage[labelfont=bf]{caption}
+            - \captionsetup[table]{font=scriptsize}
+            - \captionsetup[figure]{font=scriptsize}
+            - \usepackage{vmargin}  # Adjust the margin width here
+            - \setmarginsrb{2 cm}{0.5 cm}{2 cm}{1 cm}{1 cm}{1 cm}{1 cm}{1 cm}
+       fig-pos: 'H'
+       fig-format: pdf
+editor: source
   
 ---
 
@@ -50,8 +58,8 @@ filenames <- c('1994_post_elections_Mandela.txt',
                '1994_pre_elections_deKlerk.txt', 
                '1995_Mandela.txt', 
                '1996_Mandela.txt', 
-               '1997_Mandela.txt', '
-               1998_Mandela.txt', 
+               '1997_Mandela.txt',
+               '1998_Mandela.txt', 
                '1999_post_elections_Mandela.txt', 
                '1999_pre_elections_Mandela.txt', 
                '2000_Mbeki.txt', 
@@ -156,15 +164,113 @@ This is the introduction. To cover: what is `SONA` and what is its purpose? What
 
 ## Materials and Methods
 
-### DataSet
+This section describes thoroughly the procedures undertaken to conduct a descriptive analysis of the content of speeches using sentiment analysis and topic modelling. The entire implementation of this task was performed using RStudio, therefore the functions and libraries used throughout the process corresponds to R. However, the equivalence of this analysis can definitely be replicated on other programming platforms. There are various ways to wrangle data and only the "not so obvious" functions were explained in this report. It should be further noted that all the plots produced in this report were generated either via the `ggplot()` function from the `ggplot2` library.
 
-Summary of data-set and data cleaning methods used. How the data was read in, parsed.
+## Brief Overview of SONA dataset
 
-### Sentiment Analysis
+*Ropa's section*
 
-Summary of tools used for sentiment analysis (R packages), how data was pre-processed for sentiment analysis, and techniques used.
 
-### Topic Modelling
+## Data Pre-processing & Cleaning
+
+Raw data retrieval tends to always be messy based on the overview given about the SONA dataset in the previous section. So, tabulating the text files needed some pre-processing where the years at which the speeches occurred were extracted by identifying the first 4 strings from the filenames and attributed them to a new column. Additionally, the names of the presidents were extracted from the filenames. Within the process of extracting the presidents' names, string manipulation was performed to remove unnecessary regular expressions. Although, the dates were not specifically used in our analysis, they were parsed in a new column for our own perusal. All the unnecessary regular expressions like "`(http.*?(...`" from the speeches were also removed. All those manipulations were done using the `stringr` library. Now that we were only dealing with words, we had to make sure that all the speeches were converted to lower cases and lemmatised to avoid any redundancies. The function used to perform the lemmatisation task, was `lemmatize_strings()` from the `textstem` library. Finally, the data was converted into a tibble.
+
+
+## Central Preliminary Procedure 1 {#sec-PreliminaryProcedure1}
+
+As an initial step prior to any analyses in the whole methodology section, if the tokenisation (refer to @sec-OverallAnalysis for an explanation on the concept of tokenisation) involved:
+
+\begin{enumerate}
+  \item  words, only the lowercase words were first detected using the matching pattern \textbf{[a-z]} and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the \textbf{tidytext}  library were removed as they do not convey valid information. In addition, some common and obvious words across all the speeches like "speaker", "madame", "honourable", "chairperson", "development", "national", "ensure", "deputy", "africa", "african", "africans", "south", "southern", "government", "people", "programme", "economic", "economy", "country" and "continue" which would act like noise in our analyses, hence were filtered out.
+  
+  \item  bigrams, each word was separated into 2 different columns and then step 1 was repeated for each column. Then the cleaned separated words were united back in one column.
+  
+  \item  trigrams, each word was separated into 3 different columns and then step 1 was repeated for each column. Then the cleaned separated words were united back in one column.
+\end{enumerate}
+
+## Overall Analysis {#sec-OverallAnalysis}
+
+For any upcoming analyses, the speeches had to be tokenised accordingly to fit the purpose of our analyses. Tokenisation is the split of a sequence of characters in a text by locating the word boundaries [@palmer2000tokenisation]. The atomicity of the split could be in terms of per characters, per words, per n-grams, per sentences and more. So, tokenisation is always application dependent. For our purpose, tokenising per words and per n-grams were relevant. This was simply done using the `unnest_tokens()` function from the `tidytext` library. n-gram is a terminology very well known in the world of natural language processing (NLP), and it simply refers to a sequence of n words. If n=1, it is referred to as a unigram, if n=2, it is referred to as a bigram and if n=3, it is referred to as a trigram. The overall analysis sought to reveal the top 20 words, bigrams and trigrams used by all presidents. The steps to achieve these, followed the main procedures highlighted in @sec-PreliminaryProcedure1. Then for each case, the words, bigrams and trigrams were counted, sorted in descending order and sliced to the first 20 elements. Furthermore, they were all plotted as barplots.
+
+A more in-depth overall analysis was performed by aggregating the above per president. However, only the overall words and trigrams used per presidents were analysed. The bigrams ones were omitted as the idea was, if we were to use more than a word to do more in-depth analysis, we might as well use the trigrams as those would convey more meaningful information. So, the exact methods explained in the above paragraph were implemented with the exception that the presidents were first filtered in that same procedural pipeline.
+
+## Central Preliminary Procedure 2 {#sec-PreliminaryProcedure2}
+
+This procedure is sentiment-focused rather than use for an overall analysis purpose. Nevertheless, it follows similar steps as in @sec-PreliminaryProcedure1 with slight updates. Note that the bigram part is omitted here based on the aforementioned argument in @sec-OverallAnalysis. As usual, an initial step prior to any sentiment analyses, if the tokenisation involved:
+
+\begin{enumerate}
+  \item  words, only the lowercase words were first detected using the matching pattern \textbf{[a-z]} and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the \textbf{tidytext} library were removed as they do not convey valid information. The same common and obvious words across all the speeches as detailed in Section \ref{sec-PreliminaryProcedure1} would act like noise in our analyses, hence were filtered out. The relevant dictionary (further description about dictionaries is detailed in Section \ref{sec-SentimentAnalysisMethodology}) was left joined to the cleaned dataset on the words so that the words in the speeches would have a sentiment attached to it. Obviously, not all the words in the speeches were present in the dictionaries. Therefore, words that did not have a label were mutated to "neutral".
+
+  \item  trigrams, each word was separated into 3 different columns and then step 1 was repeated for each column. Then the cleaned separated words were united back in one column. Because we were dealing with trigrams, the sentiments had to be polarised (i.e, "positive" = 1, "neutral" = 0 and "negative" = -1) in order to be able to calculate a final sentiment score for all the trio of words. That was based on the sum of all polarised sentiment belonging to each trio of words. Moreover, if the final sentiment score = 0, the trigrams would remain as "neutral". If the final sentiment score $\geq$ 1, the trigrams would be "positive" and if the final sentiment score < 1, the trigrams would be "negative".
+\end{enumerate}
+
+## Sentiment Analysis {#sec-SentimentAnalysisMethodology}
+
+According to @medhat2014sentiment, sentiment analysis also known as the opinion mining study people's opinions, attitudes, and emotions towards an entity in a computational manner and can also be considered as a classification process. Our sentiment analysis took a lexicon dictionary-based approach which is considered as a very feasible approach as it does not involve any training data and advanced machine learning techniques [@wankhade2022survey]. For this reason, some experts like @yan2010integrating also referred to this approach as an unsupervised approach. The 2 main dictionaries used in our analyses were `bing` and `nrc`.
+
+The `bing` dictionary was loaded from the `tidytext` library. Each of the 6786 words in the dictionary is assigned to a binary sentiment of either positive or negative. The main disadvantage of the lexicon approach is that it is highly domain-oriented. Indeed, during some analysis, words like "anti poverty", "anti corruption", and so on were classified as negative sentiment as the word "anti" did not exist in the `bing` dictionary. Therefore, this issue was resolved by adding the word "anti" in the `bing` dictionary and assigned a positive sentiment to it as this label fits the context of this analysis. This part of the sentiment analysis explored the top 20 positive and negative words and trigrams used by all presidents. The steps to achieve these, followed the main procedures highlighted in @sec-PreliminaryProcedure2. Then for each case, the words and trigrams were filtered by either "positive" or "negative" sentiment, followed by a count and a sort in descending order and eventually sliced to the first 20 elements. Furthermore, they were all plotted as barplots.
+
+A more in-depth sentiment analysis was performed by aggregating the above per president. The exact methods explained in the above paragraph were implemented with the exception that the presidents were first filtered in that same procedural pipeline. It was also vital to investigate the variation of positive and negative sentiments over the years while excluding deKlerk and Motlanthe as they were only 1-term presidents. Those investigations were done for both words and trigrams by following the procedure as described in @sec-PreliminaryProcedure2 and then plotted as barplots and line graphs. The only key aspect here was to group the sentiment and year before counting how many positive and negative sentiments were recorded per year. 
+
+*Ropa: nrc dictionary descriptions*
+
+```{r Main data cleaning, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Set speech to lower case + lemmatize
+sona_sentiment <- sona %>%
+  mutate(speech = lemmatize_strings(tolower(speech)))
+ 
+sona_sentiment <- as_tibble(sona_sentiment) # convert dataframe to tibble
+sona_sentiment <- sona_sentiment[,-1] # removing first column
+unnest_reg <- "[^\\w_#@']"
+
+# Remove common SONA words that are used very regularly, but which don't convey too much meaning
+common_sona_reg <- 'speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country|continue'
+```
+
+```{r Sentiment dictionaries, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# import sentiment dictionaries
+
+bing <- get_sentiments('bing') 
+#unique(bing$sentiment)
+
+nrc <- get_sentiments('nrc') 
+#unique(nrc$sentiment)
+
+save(bing, nrc, file = "dsfi-lexicons.Rdata")
+```
+
+
+## Topic Modelling
+
+Topic modelling is a machine learning technique that scans tokens (usually words) in sequences (usually documents), with the aim of detecting word and phrase patterns within the sequences. This is achieved by clustering word groups and similar expressions together into ‘topics’ that best characterize a set of documents. [@Pascual2019]
+
+Topic models can help offer insights into bodies of text, for better understanding of large collections of unstructured text bodies. [@Blei2012]
+
+In this assignment topic modelling was performed as follows:
+
+From the pre-generated tibble the following commonly-used words were removed from SONA speeches: `speaker, madame, honourable, chairperson, development, national`, `ensure, deputy, africa, african, africans, south, southern`, `government, people, programme, economic, economy, country`
+
+A data-set of terms that appeared in a resulting corpus of speeches was then extracted into a **document-term matrix**, containing rows corresponding to the speeches and columns corresponding to the words.
+
+The **Latent Dirichlet allocation (LDA)** method was then used to extract topics from the sparse and wide document-term matrix. 
+The LDA algorithm is guided by two principles:
+
+* Every document is a mixture of *topics* (for example 90% topic A and 10% topic B) and every topic is a mixture of *words*. 
+* Every topic is a probability distribution over words.  
+
+LDA draws topic distributions from a Dirichlet distribution and uses variational expectation maximisation algorithm, and collapsed Gibbs sampling (both beyond the scope of this assignment) to achieve topic model estimations.
+
+The **LDA()** function from the `topicmodels` package was used to retrieve LDA topic models.
+
+Latent Dirichlet allocation Topic modelling was performed in the following way:
+
+* The top 5 topics were retrieved across all speeches (to retrieve president-specific topics). 
+* The `tidytext` package was then used to extract **per-topic-per-word probabilities** (the "beta") from the model.
+* The **per-president-per-topic probabilities** (the "gamma") were then extracted using the `tidytext` package.
+* The log ratio of beta values of topics for different presidents were compared to reveal words with the greatest differences between the two presidents' topics.
+* Finally, the speeches of Ramaphosa were retrieved, and the same exercise was repeated for Ramaphosa-specific speeches (to gain insights into the topics that permeated his speeches over the years).
+
 
 ```{r lda_all, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -194,7 +300,7 @@ sona_tdf <- sona_tdf %>% filter(!grepl(common_sona_reg, word))
 dtm_sona <- sona_tdf %>% cast_dtm(pres, word, n)
 
 # Estimate the parameters of the topic model using LDA
-sona_lda <- LDA(dtm_sona, k = 4, control = list(seed = 1234))
+sona_lda <- LDA(dtm_sona, k = 5, control = list(seed = 2023))
 
 # Use the tidy() function by the  tidytext package 
 # for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
@@ -222,7 +328,1434 @@ Results introduction
 
 ### Sentiment Analysis
 
+
+
+
+## Overall Analysis
+
+```{r Top 20 words/bigrams/trigrams used by all presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# OVERALL COMMON WORDS ANALYSIS -------------------------------------------
+#  Most common words used by all presidents -------------------------------
+overall_common_words <- sona_sentiment %>% 
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 words used by all presidents") +
+  theme(plot.title = element_text(size = 7), 
+        axis.title.x = element_text(size = 7), 
+        axis.title.y = element_text(size = 7),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        legend.position = '')+
+  scale_fill_gradient(low = "black", high = "grey")
+
+
+
+# Most common bigram used by all presidents -------------------------------
+overall_common_bigram <- sona_sentiment %>% 
+  unnest_tokens(bigram, speech, token = 'ngrams', n=2) %>%
+  separate(bigram, c('word1', 'word2'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  unite(bigram, word1, word2, sep = ' ') %>%
+  count(bigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(bigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 bigrams used by all presidents") +
+  theme(plot.title = element_text(size = 7), 
+        axis.title.x = element_text(size = 7), 
+        axis.title.y = element_text(size = 7),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        legend.position = '')+
+  scale_fill_gradient(low = "black", high = "grey")
+
+
+# Most common trigram used by all presidents ------------------------------
+overall_common_trigram <- sona_sentiment %>% 
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by all presidents") +
+  theme(plot.title = element_text(size = 7), 
+        axis.title.x = element_text(size = 7), 
+        axis.title.y = element_text(size = 7),
+        axis.text.x = element_text(size = 7),
+        axis.text.y = element_text(size = 7),
+        legend.position = '')+
+  scale_fill_gradient(low = "black", high = "grey")
+
+```
+
+An overall analysis was executed on the speeches to extract the top 20 words, bigrams and trigrams used by all the presidents to obtain an idea about which of those conveyed meaningful information. 
+
+@fig-A represents the top 20 words, bigrams and trigrams used by all presidents. Plot **A** showcases that all presidents would obviously address the public most of the time. Moreover, the top words were linked to development and were very businessy. Plot **B** were way more meaningful than plot **A** and it seemed like majority of presidents were addressing private sectors more than public sectors in their speeches. They addressed the unity of nations, job creations, justice system and specific locations in South Africa. Nelson Mandela seemed to have been a model to the other presidents being the first anti-apartheid activist and president of the country, hence mentioned several times. The 2010 FIFA world cup that was held in South Africa brought such a positive and festive vibe in Cape Town, no wonder why it was in the top 20 bigrams. Plot **C** was even more meaningful and we could observe that the bigram "justice system" and "criminal justice" were the least occurred words in the top 20 bigram plot. That was because those particular bigrams were not that meaningful, as such plot **C**
+
+```{r fig-A, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 words, pair of words (bigrams), and trio of words (trigrams) used by all presidents.", fig.width = 10}
+
+# combining above plots in one figure
+cowplot::plot_grid(overall_common_words, overall_common_bigram, overall_common_trigram,
+                   nrow = 1, ncol = 3, labels = "AUTO", label_size = 6, label_x = 0) +
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+revealed the real meaning of the words being criminal justice system, hence that trigram had the highest occurrence. In addition, a lot of projects like trade union movement, public private partnership, child support grant, adult basic education, continental free trade, community of forum and more were the subject matter amid presidents. The economy of the country was also address in terms of the gross domestic product (GDP), however, problems like gender-based violence outweighed the number of occurrences for the country's GDP, and this priority was valid here. 
+
+```{r Top 20 words used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# PER PRESIDENT COMMON WORDS ANALYSIS -------------------------------------
+# Most common words used per president ------------------------------------
+# common_words_Mandela <- sona_sentiment %>% 
+#   filter(pres == 'Mandela') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by Mandela") +
+#   theme(plot.title = element_text(size = 11), legend.position = '') +
+#   scale_fill_gradient(low = "deeppink3", high = "pink")
+# 
+# common_words_deKlerk <- sona_sentiment %>% 
+#   filter(pres == 'deKlerk') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by deKlerk") +
+#   theme(plot.title = element_text(size = 11), legend.position = '') +
+#   scale_fill_gradient(low = "chocolate", high = "burlywood1")
+# 
+# common_words_Mbeki <- sona_sentiment %>% 
+#   filter(pres == 'Mbeki') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by Mbeki") +
+#   theme(plot.title = element_text(size = 11), legend.position = '')
+# 
+# 
+# common_words_Zuma <- sona_sentiment %>% 
+#   filter(pres == 'Zuma') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by Zuma") +
+#   theme(plot.title = element_text(size = 11), legend.position = '') + 
+#   scale_fill_gradient(low = "magenta4", high = "plum")
+# 
+# 
+# common_words_Motlanthe <- sona_sentiment %>% 
+#   filter(pres == 'Motlanthe') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by Motlanthe") +
+#   theme(plot.title = element_text(size = 11), legend.position = '') + 
+#   scale_fill_gradient(low = "darkcyan", high = "paleturquoise")
+# 
+# 
+# common_words_Ramaphosa<- sona_sentiment %>% 
+#   filter(pres == 'Ramaphosa') %>%
+#   unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+#   filter(str_detect(word, '[a-z]')) %>% 
+#   filter(!word %in% stop_words$word) %>%
+#   filter(!grepl(common_sona_reg, word)) %>%
+#   count(word, sort = T) %>%
+#   slice(1:20) %>%
+#   #filter(rank(desc(n)) <= 20) %>%
+#   ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+#   ggtitle("Top 20 words used by Ramaphosa") +
+#   theme(plot.title = element_text(size = 11), legend.position = '') + 
+#   scale_fill_gradient(low = "darkgreen", high = "darkseagreen1")
+
+```
+
+<!-- The top 20 words used by each president are represented @fig-B. Based on the words of Mandela, he really demonstrated a presidency that was committed to public service, inclusivity, community building, and addressing a range of social, economic, and security-related challenges. Mandela's leadership was marked by a dedication to nation-building, reconciliation, and addressing the needs of the people. In general, deKlerk's top 20 words were very political, which completely makes sense because he had to promote a peaceful post-apartheid transition. His presidency was characterised by significant political, constitutional, and social changes, aimed at ending apartheid and establishing a more inclusive and democratic South Africa. The top 20 words reflected the complex and multifaceted nature of the challenges he faced and the efforts he made to transform the country's political landscape. Based on the top 20 words from Mbeki, it seemed like his presidency was marked by a commitment to improving public services, addressing social issues, promoting economic growth and development, and addressing significant challenges. His top 20 words were not that meaningful because that is basically what all presidents would want to achieve in a society. Among the top 20 words of Zuma, the ones that really stood out were energy and water as during his presidency, he was dealing with some energy and water crisis. The top 20 words for Motlanthe became quite repetitive at this point. We saw that he still dealt with some crisis, poverty and other challenges. Interestingly, he was the first president from which the word poverty was first appeared in the top tiers. Ramaphosa's top 20 words revealed a lot about his personality. He is a businessman, so his approach as president was very business-oriented. He seemed to have priorited economic development, job creation, and social welfare during his term as president. -->
+
+```{r fig-B, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 words used by each president. **A** relates to Mandela's words, **B** relates to deKlerk's words, **C** relates to Mbeki's words, **D** relates to Zuma's words, **E** relates to Motlanthe's words, and **F** relates to Ramaphosa's words.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+# cowplot::plot_grid(common_words_Mandela, common_words_deKlerk,
+#                    common_words_Mbeki, common_words_Zuma,
+#                    common_words_Motlanthe, common_words_Ramaphosa,
+#                    nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0) +
+#   theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r Top 20 trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Most common trigram used per president ----------------------------------
+common_trigram_Mandela <- sona_sentiment %>% 
+  filter(pres == 'Mandela') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by Mandela") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+common_trigram_deKlerk <- sona_sentiment %>% 
+  filter(pres == 'deKlerk') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by deKlerk") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+  
+common_trigram_Mbeki <- sona_sentiment %>% 
+  filter(pres == 'Mbeki') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by Mbeki") +
+  theme(plot.title = element_text(size = 11), legend.position = '') 
+
+common_trigram_Zuma <- sona_sentiment %>% 
+  filter(pres == 'Zuma') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by Zuma") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "magenta4", high = "plum") 
+
+common_trigram_Motlanthe <- sona_sentiment %>% 
+  filter(pres == 'Motlanthe') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by Motlanthe") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise") 
+
+common_trigram_Ramaphosa <- sona_sentiment %>% 
+  filter(pres == 'Ramaphosa') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 trigrams used by Ramaphosa") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "darkgreen", high = "darkseagreen1")
+
+
+
+```
+
+@fig-C displays the top 20 trigrams per president. Mandela's trigrams clearly indicated the challenges and priorities, he was dealing at his time of presidency. Without re-emphasising on the trigrams, here's a brief overiew. Mandela's commitment to address social issues, improving public services, maintaining law and order, promoting workers' rights, and ensuring a strong constitutional framework has not gone unnoticed. Once again, his presidency was characterized by a focus on reconciliation and inclusivity, as well as engagement with international matters. Overall, Mandela's presidency was marked by his dedication to nation-building, social progress, and upholding democratic values. Due to the fact that deKlerk was only a 1-term president, all his top words had only a count of 1. Once again, the word constitution appeared multiple times. Indeed, he was dealing with a period of significant political transformation in South Africa. He was therefore working on constitutional negotiations, peace-building, and addressing political and social challenges. His presidency was marked by efforts to move away from apartheid policies and towards a more inclusive and democratic system. Mbeki's top tier words looked quite diverse. He appeared to address issues related to security, governance, economic development, and education. Moreover, the focus on major sporting events like the soccer world cup suggested a commitment to the country's international standing and promoting sports. Additionally, the reference to traditional leadership and community centres indicated engagement with South Africa's cultural and local governance dynamics. As per the top 20 trigrams for Zuma, he seemed to have focused on economic policies, infrastructure development, and addressing corruption. Apart from the social and economic programs, he had to host the 2010 FIFA world cup during his tenure. Motlanthe's trigrams was not that helpful as he was also only a 1-term president. His top 20 trigrams did not convey meaningful information. The only observation was that it appeared that he may have been dealing with a range of complex challenges, with a focus on social and economic development, justice and anti-corruption. Ramaphosa's trigrams sounded very promising and he seemed to have focused on addressing a wide range of issues, including social challenges like gender-based violence, economic development through trade and job creation, legal and constitutional matters, and engagement with various communities and organizations. His governance reflects a multifaceted approach with policy-making aimed at addressing both immediate and long-term challenges facing South Africa. An observation was made that across the trigrams per president, criminal justice system has appeared various time, which also means that crime is still a persistent problem in South Africa.
+
+```{r fig-C, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 trio of words (trigrams) used by each president. **A** relates to Mandela's trigrams, **B** relates to deKlerk's trigrams, **C** relates to Mbeki's trigrams, **D** relates to Zuma's trigrams, **E** relates to Motlanthe's trigrams, and **F** relates to Ramaphosa's trigrams.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+cowplot::plot_grid(common_trigram_Mandela, common_trigram_deKlerk,
+                   common_trigram_Mbeki, common_trigram_Zuma,
+                   common_trigram_Motlanthe, common_trigram_Ramaphosa,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0) +
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+## Sentiment Analysis
+
+```{r Top 20 positive/negative words used by all presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common positive words used by all presidents -----------------------
+overall_common_positive_words <- sona_sentiment %>% 
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by all presidents") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
+  
+# Most common negative words used by all presidents -----------------------
+overall_common_negative_words <- sona_sentiment %>% 
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by all presidents") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "red", high = "pink")
+
+
+
+
+```
+
+@fig-D...
+
+```{r fig-D, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive (**A**) and negative (**B**) words used by all presidents.", fig.width = 10}
+# combining above plots in one figure
+cowplot::plot_grid(overall_common_positive_words, overall_common_negative_words,
+                   nrow = 1, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r Top 20 positive words used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common positive words used per president ---------------------------
+common_positive_words_Mandela <- sona_sentiment %>% 
+  filter(pres == 'Mandela') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by Mandela") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+common_positive_words_deKlerk <- sona_sentiment %>% 
+  filter(pres == 'deKlerk') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by deKlerk") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+
+
+common_positive_words_Mbeki <- sona_sentiment %>% 
+  filter(pres == 'Mbeki') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by Mbeki") +
+  theme(plot.title = element_text(size = 11), legend.position = '')
+
+common_positive_words_Zuma <- sona_sentiment %>% 
+  filter(pres == 'Zuma') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by Zuma") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "magenta4", high = "plum") 
+
+common_positive_words_Motlanthe <- sona_sentiment %>% 
+  filter(pres == 'Motlanthe') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by Motlanthe") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise") 
+
+common_positive_words_Ramaphosa <- sona_sentiment %>% 
+  filter(pres == 'Ramaphosa') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive words used by Ramaphosa") +
+  theme(plot.title = element_text(size = 11), legend.position = '')  +
+  scale_fill_gradient(low = "darkgreen", high = "darkseagreen1")
+
+```
+
+@fig-E...
+
+```{r fig-E, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive words used by each president. **A** relates to Mandela's positive words, **B** relates to deKlerk's positive words, **C** relates to Mbeki's positive words, **D** relates to Zuma's positive words, **E** relates to Motlanthe's positive words, and **F** relates to Ramaphosa's positive words.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+cowplot::plot_grid(common_positive_words_Mandela, common_positive_words_deKlerk,
+                   common_positive_words_Mbeki, common_positive_words_Zuma,
+                   common_positive_words_Motlanthe, common_positive_words_Ramaphosa,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r Top 20 negative words used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common negative words used per president ---------------------------
+common_negative_words_Mandela <- sona_sentiment %>% 
+  filter(pres == 'Mandela') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by Mandela") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+common_negative_words_deKlerk <- sona_sentiment %>% 
+  filter(pres == 'deKlerk') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by deKlerk") +
+  theme(plot.title = element_text(size = 11), legend.position = '')+
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+
+common_negative_words_Mbeki <- sona_sentiment %>% 
+  filter(pres == 'Mbeki') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by Mbeki") +
+  theme(plot.title = element_text(size = 11), legend.position = '')
+
+
+common_negative_words_Zuma <- sona_sentiment %>% 
+  filter(pres == 'Zuma') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by Zuma") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "magenta4", high = "plum") 
+
+common_negative_words_Motlanthe <- sona_sentiment %>% 
+  filter(pres == 'Motlanthe') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by Motlanthe") +
+  theme(plot.title = element_text(size = 11), legend.position = '') +
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise") 
+
+
+common_negative_words_Ramaphosa <- sona_sentiment %>% 
+  filter(pres == 'Ramaphosa') %>%
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(word, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(word, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative words used by Ramaphosa") +
+  theme(plot.title = element_text(size = 11), legend.position = '')  +
+  scale_fill_gradient(low = "darkgreen", high = "darkseagreen1")
+
+```
+
+@fig-F...
+
+```{r fig-F, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 negative words used by each president. **A** relates to Mandela's negative words, **B** relates to deKlerk's negative words, **C** relates to Mbeki's negative words, **D** relates to Zuma's negative words, **E** relates to Motlanthe's negative words, and **F** relates to Ramaphosa's negative words.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+cowplot::plot_grid(common_negative_words_Mandela, common_negative_words_deKlerk,
+                   common_negative_words_Mbeki, common_negative_words_Zuma,
+                   common_negative_words_Motlanthe, common_negative_words_Ramaphosa,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r positive and negative words sentiment over time, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Overall change in word sentiment over time ------------------------------
+
+overall_word_bing_sentiment_change_over_time <- sona_sentiment %>% 
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) %>% # excluding 1 time president
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  group_by(bing_sentiment, speech_year) %>%
+  tally() %>%
+  pivot_wider(names_from = 'bing_sentiment', values_from = n, values_fill = 0) %>%
+  mutate(bing_sentiment_pos_minus_neg = positive - negative) %>%
+  ggplot(aes(x = speech_year, y = bing_sentiment_pos_minus_neg)) + 
+  geom_col(fill = 'springgreen') + 
+  geom_col(data=. %>% filter(bing_sentiment_pos_minus_neg<0), fill = 'red') +
+  xlab('Year') + ylab('Sentiment') +
+  theme(plot.title = element_text(size = 11)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_rect(aes(xmin = 1 - 0.5, xmax = 6 + 0.5, ymin = -5, ymax = 103),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=1.2, y= 7+103, label="Mandela", colour="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 - 0.5, xmax = 15 + 0.5, ymin = 0, ymax = 183),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7, y= 7+183, label="Mbeki", colour="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16 - 0.5, xmax = 24 + 0.5, ymin = 0, ymax = 110),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16, y=7+110, label="Zuma", colour="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25 - 0.5, xmax = 30 + 0.5, ymin = 0, ymax = 215),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25.2+.3, y=7+215, label="Ramaphosa",colour="darkgreen", size = 3) 
+  
+  
+overall_pos_neg_fluctuation <- sona_sentiment %>% 
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) %>% # excluding 1 time president
+  unnest_tokens(word, speech, token = 'words') %>%
+  filter(str_detect(word, '[a-z]')) %>% 
+  filter(!word %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word)) %>%
+  left_join(bing, by = 'word') %>%
+  rename(bing_sentiment = sentiment) %>%
+  mutate(bing_sentiment = ifelse(is.na(bing_sentiment), 'neutral', bing_sentiment)) %>%
+  group_by(bing_sentiment, speech_year) %>%
+  tally() %>%
+  filter(bing_sentiment != 'neutral') %>%
+  ggplot(aes(x = speech_year, y = n, colour = bing_sentiment, group = bing_sentiment)) + 
+  geom_line() +
+  scale_colour_manual(values = c("positive" = "springgreen", "negative" = "red")) +
+  geom_smooth(linewidth = 0.2, alpha = 0.2, level = 0.6) +
+  ylab('Count') +
+  xlab('Year') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'bottom') +
+  labs(colour = '') +
+  geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 460),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=1.7, y=20+460, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 390),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7+.5, y=20+390, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16, xmax = 24, ymin = 0, ymax = 300),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16+.5, y=20+300, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25, xmax = 30, ymin = 0, ymax = 560),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=26, y=20+560, label="Ramaphosa",color="darkgreen", size = 3) 
+  
+```
+
+@fig-G...
+
+```{r fig-G, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap=" Positive and negative words sentiment over time (excluding 1-term presidents such as deKlerk and Motlanthe). **A** corresponds to how many more positive than negative words (or vice versa) computed over the years [1994-2023]. So, the y-axis for **A** was calculated as *Sentiment = positive words - negative words*. **B** refers to the actual count of positive and negative words throughout the same mentioned period. The bounding boxes indicate which part of this timeline belongs to the presidency period of Mandela, Mbeki, Zuma and Ramaphosa.", fig.width = 10, fig.height = 7}
+
+# combining above plots in one figure
+cowplot::plot_grid(overall_word_bing_sentiment_change_over_time, overall_pos_neg_fluctuation,
+                   nrow = 2, ncol = 1, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+
+
+```{r Top 20 positive/negative trigrams used by all presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common positive trigrams used by all presidents --------------------
+# redefining bing dictionary and force the word 'anti' to be positive.
+bing_word1 <- bing %>%
+  mutate(word1 = word) %>% 
+  add_row(sentiment = 'positive', word1 = 'anti') %>%
+  dplyr::select(-1)
+bing_word2 <- bing %>%
+  mutate(word2 = word) %>% 
+  add_row(sentiment = 'positive', word2 = 'anti') %>%
+  dplyr::select(-1)
+bing_word3 <- bing %>%
+  mutate(word3 = word) %>% 
+  add_row(sentiment = 'positive', word3 = 'anti') %>%
+  dplyr::select(-1)
+
+overall_common_positive_trigrams <- sona_sentiment %>% 
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by all presidents") +
+  theme(plot.title = element_text(size = 10), legend.position = '')+
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
+
+
+
+overall_common_negative_trigrams <- sona_sentiment %>% 
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by all presidents") +
+  theme(plot.title = element_text(size = 10), legend.position = '')+
+  scale_fill_gradient(low = "red", high = "pink")
+```
+
+Plot **A** of @fig-H is a typical example of the presidents trying to improve the well-being of the local population, especially those who live in informal settlements suffering from basic amenities. So, the positive trigrams highlighted a range of policy areas, projects and achievements, including social welfare, economic development, public services, infrastructure, and international engagement. 
+
+For plot **B**, there were several words like gross domestic product, crime prevention strategy, sexual offence court, prosecute authority npa, sexual office unit, passenger rail agency, gross fix capital, fight organise crime, emergency task team, corruption task team, and corruption advisory council which should not have been categorised as negative sentiment. Nevertheless, the problem for crime seemed persistent which was why a criminal justice system needed refinement. Although the criminal justice system is a positive sentiment, we treated it as negative because if there were no crimes, it would be pointless to have a criminal justice system. So, its existence entailed the unsolved problem of crime in the country. In fact, the same logic could be argued with regards to sexual offence court.
+
+```{r fig-H, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive (**A**) and negative (**B**) trio of words (trigrams) used by all presidents.", fig.width = 10}
+
+# combining above plots in one figure
+cowplot::plot_grid(overall_common_positive_trigrams, overall_common_negative_trigrams,
+                   nrow = 1, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+
+```
+
+```{r Top 20 positive trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common positive trigrams used per president ------------------------
+Mandela_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Mandela') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by Mandela") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+
+deKlerk_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'deKlerk') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("The only 9 positive trigrams used by deKlerk") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+
+
+Mbeki_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Mbeki') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by Mbeki") +
+  theme(plot.title = element_text(size = 9), legend.position = '')
+
+Zuma_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Zuma') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by Zuma") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "magenta4", high = "plum")
+
+Motlanthe_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Motlanthe') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by Motlanthe") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise")
+
+
+
+Ramaphosa_common_positive_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Ramaphosa') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'positive') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 positive trigrams used by Ramaphosa") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
+
+
+
+```
+
+@fig-I depicts the positive sentiment of trigrams per president. Mandela's positive sentiment focused on social welfare, economic development, social justice, reconciliation, and peace. He worked to create a more inclusive and just society while addressing a range of challenges, both domestic and international. He wanted to promote black empowerment as he was fighting for the abolition of apartheid. So, Mandela's commitment to building a post-apartheid South Africa that was democratic, equitable, and prosperous is still engraved in our heart. His main priority seemed to be the provision for free medical care. Since deKlerk was only a 1-term president, only 9 unique positive trigrams were obtained. His focus on building trust, finding practical solutions, and ensuring genuine autonomy and constitutional safeguards indicated a commitment to resolving issues related to apartheid, political reform, and peace-building. It was consistent with his role in initiating negotiations to end apartheid and lead South Africa towards a more inclusive and democratic future. The top 20 positive sentiment trigrams for Mbeki was focused on infrastructure and basic amenities development, social welfare, economic growth, and international cooperation (i.e, afro-asian solidarity). He definitely tried to promote unity and solidarity in South Africa. Zuma's positive sentiment trigrams showcased an all-rounded presidency with a focus on social welfare, diplomacy, economic development, public health, and governance. The positive sentiment trigrams from Motlanthe also being a 1-term president aimed to address a range of issues, including economic growth, social welfare, competitiveness, equitable development, and infrastructure improvement. His administration appeared to have focused on creating a more inclusive and socially responsible society, with an emphasis on social support, economic stability, and equitable access to healthcare. It was no surprise to see that continental free trade was the first positive sentiment trigram for Ramaphosa, as he is always very business-oriented. He was really dedicated to economic growth, social inclusivity, diplomacy, democratic governance, and addressing pressing issues such as land reform and healthcare. He seemed to also focus on collaborative efforts and comprehensive planning to address the nation's challenges and drive progress. Overall, it was observed that most presidents were promoting child support grant and free basic amenities and clean water.
+
+```{r fig-I, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive trio of words (trigrams) used by each president. **A** relates to Mandela's positive trigrams, **B** relates to deKlerk's positive trigrams, **C** relates to Mbeki's positive trigrams, **D** relates to Zuma's positive trigrams, **E** relates to Motlanthe's positive trigrams, and **F** relates to Ramaphosa's positive trigrams.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+cowplot::plot_grid(Mandela_common_positive_trigrams, deKlerk_common_positive_trigrams,
+                   Mbeki_common_positive_trigrams, Zuma_common_positive_trigrams,
+                   Motlanthe_common_positive_trigrams, Ramaphosa_common_positive_trigrams,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r Top 20 negative trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Most common negative trigrams used per president ------------------------
+
+Mandela_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Mandela') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by Mandela") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+
+deKlerk_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'deKlerk') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("The only 5 negative trigrams used by deKlerk") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+
+
+Mbeki_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Mbeki') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by Mbeki") +
+  theme(plot.title = element_text(size = 9), legend.position = '')
+
+Zuma_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Zuma') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by Zuma") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "magenta4", high = "plum")
+
+
+Motlanthe_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Motlanthe') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("The only 18 negative trigrams used by Motlanthe") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise")
+
+
+Ramaphosa_common_negative_trigrams <- sona_sentiment %>% 
+  filter(pres == 'Ramaphosa') %>%
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  filter(bing_sentiment == 'negative') %>%
+  count(trigram, sort = T) %>%
+  slice(1:20) %>%
+  #filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(x = reorder(trigram, n), y = n, fill = -n)) + geom_col() + coord_flip() + ylab('Count') + xlab('') +
+  ggtitle("Top 20 negative trigrams used by Ramaphosa") +
+  theme(plot.title = element_text(size = 9), legend.position = '') +
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
+```
+
+@fig-J illustrates the negative sentiment of trigrams per president. Mandela's presidency emphasised on inclusivity, human rights and social justice as mentioned before. During his time, he unfortunately had to deal with significant challenges, such as crime, corruption, land issues, child abuse and rape, poverty, and environmental concerns. The top 2 sentiments were rather positive, but crime related. Due to deKlerk being a 1-term president, he had only 5 unique negative sentiments trigrams which did not really convey much information apart from words like hopeless, hard negotiation, threaten, conflict and difficulty which only highlighted some challenges and hardships during his presidency without any specific context. Ignoring the trigrams which were supposed to have strictly positive sentiments like gross domestic product and post conflict reconstruction; the crime related matter kept on persisting with some other social matters, public health issues and other political challenges. Again, ignoring gross domestic product being a positive sentiment trigram, the crime issue were on top of the list during Zuma's presidency. Furthermore, he had to deal with corruption, economic challenges, infrastructural breakdown, and some social and environmental concerns. Motlanthe's was also a 1-term president and from the trigrams, "poverty decline substantially", "metric poverty decline", "input price decline", "hungry decline dramatically", "gross fix capital" and "gross domestic product" should be ignored and treated as positive sentiment. This was a good example of the disadvantages of using lexicon-dictionary based approach for sentiment analysis. Nevertheless, crime, inequality, security measure issue, economic issues, political challenges and illicit activities were still the major concerns during his presidency. We again see some false negative sentiment present in the trigrams for Ramaphosa. Ignoring those, he still had to deal with crime related issues, violence in public, poverty, insanitation, water shortage, drug trafficking, debt perhaps due to the global pandemic which he also mentioned. It was quite clear that throughout all these year the crime issues, poverty, and violence were not able to eradicate or at a bare minimum to mitigate.
+
+
+```{r fig-J, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 negative trio of words (trigrams) used by each president. **A** relates to Mandela's negative trigrams, **B** relates to deKlerk's negative trigrams, **C** relates to Mbeki's negative trigrams, **D** relates to Zuma's negative trigrams, **E** relates to Motlanthe's negative trigrams, and **F** relates to Ramaphosa's negative trigrams.", fig.width = 10, fig.height = 10}
+# combining above plots in one figure
+cowplot::plot_grid(Mandela_common_negative_trigrams, deKlerk_common_negative_trigrams,
+                   Mbeki_common_negative_trigrams, Zuma_common_negative_trigrams,
+                   Motlanthe_common_negative_trigrams, Ramaphosa_common_negative_trigrams,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
+  theme(plot.background = element_rect(color = "black", linewidth = 2))
+```
+
+```{r positive and negative trigrams sentiment over time, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+# Overall change in trigram sentiment over time ---------------------------
+
+overall_trigram_bing_sentiment_change_over_time <- sona_sentiment %>% 
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) %>% # excluding 1 time president
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  group_by(bing_sentiment, speech_year) %>%
+  tally() %>%
+  pivot_wider(names_from = 'bing_sentiment', values_from = n, values_fill = 0) %>%
+  mutate(bing_sentiment_pos_minus_neg = positive - negative) %>%
+  ggplot(aes(x = speech_year, y = bing_sentiment_pos_minus_neg)) + 
+  geom_col(fill = 'springgreen') + 
+  geom_col(data=. %>% filter(bing_sentiment_pos_minus_neg<0), fill = 'red') +
+  xlab('Year') + ylab('Sentiment') +
+  theme(plot.title = element_text(size = 11)) +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_rect(aes(xmin = 1 - 0.5, xmax = 6 + 0.5, ymin = 0, ymax = 16),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=1.15, y= 3+16, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 - 0.5, xmax = 15 + 0.5, ymin = -12, ymax = 25),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7, y= 3+25, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16 - 0.5, xmax = 24 + 0.5, ymin = 0, ymax = 40),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16, y=3+40, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25 - 0.5, xmax = 30 + 0.5, ymin = 0, ymax = 85),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25+.3, y=3+85, label="Ramaphosa",color="darkgreen", size = 3) 
+
+
+overall_pos_neg_trigram_fluctuation <- sona_sentiment %>% 
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) %>% # excluding 1 time president
+  unnest_tokens(trigram, speech, token = 'ngrams', n=3) %>%
+  separate(trigram, c('word1', 'word2', 'word3'), sep = ' ') %>%
+  filter(str_detect(word1, '[a-z]'), str_detect(word2, '[a-z]'), str_detect(word3, '[a-z]')) %>%
+  filter(!word1 %in% stop_words$word & !word2 %in% stop_words$word & !word3 %in% stop_words$word) %>%
+  left_join(bing_word1, by = 'word1') %>% rename(bing_sentiment1 = sentiment) %>%
+  left_join(bing_word2, by = 'word2') %>% rename(bing_sentiment2 = sentiment) %>%
+  left_join(bing_word3, by = 'word3') %>% rename(bing_sentiment3 = sentiment) %>%
+  filter(!grepl(common_sona_reg, word1)) %>%
+  filter(!grepl(common_sona_reg, word2)) %>%
+  filter(!grepl(common_sona_reg, word3)) %>%
+  unite(trigram, word1, word2, word3, sep = ' ') %>%
+  mutate(bing_sentiment1 = ifelse(is.na(bing_sentiment1), 'neutral', bing_sentiment1)) %>%
+  mutate(bing_sentiment2 = ifelse(is.na(bing_sentiment2), 'neutral', bing_sentiment2)) %>%
+  mutate(bing_sentiment3 = ifelse(is.na(bing_sentiment3), 'neutral', bing_sentiment3)) %>%
+  mutate(bing_sentiment1_score = case_when(bing_sentiment1 == 'neutral' ~ 0,
+                                           bing_sentiment1 == 'positive' ~ 1,
+                                           bing_sentiment1 == 'negative' ~ -1),
+         bing_sentiment2_score = case_when(bing_sentiment2 == 'neutral' ~ 0,
+                                           bing_sentiment2 == 'positive' ~ 1,
+                                           bing_sentiment2 == 'negative' ~ -1),
+         bing_sentiment3_score = case_when(bing_sentiment3 == 'neutral' ~ 0,
+                                           bing_sentiment3 == 'positive' ~ 1,
+                                           bing_sentiment3 == 'negative' ~ -1),
+         bing_sentiment_finalscore = bing_sentiment1_score +bing_sentiment2_score+bing_sentiment3_score,
+         bing_sentiment = case_when(bing_sentiment_finalscore == 0 ~ 'neutral',
+                                    bing_sentiment_finalscore >= 1 ~ 'positive',
+                                    bing_sentiment_finalscore <  1 ~ 'negative')) %>%
+  group_by(bing_sentiment, speech_year) %>%
+  tally() %>%
+  filter(bing_sentiment != 'neutral') %>%
+  ggplot(aes(x = speech_year, y = n, colour = bing_sentiment, group = bing_sentiment)) + 
+  geom_line() +
+  scale_colour_manual(values = c("positive" = "springgreen", "negative" = "red")) +
+  geom_smooth(linewidth = 0.2, alpha = 0.2, level = 0.6) +
+  ylab('Count') +
+  xlab('Year') +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1), legend.position = 'bottom') +
+  labs(color = '') +
+  geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 55),
+            fill = "transparent", color = "deeppink3", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=1+.5, y=7+55, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 55),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7+.5, y=7+55, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16, xmax = 24, ymin = 0, ymax = 75),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16+.5, y=7+75, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25, xmax = 30, ymin = 0, ymax = 150),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25+.8, y=7+150, label="Ramaphosa",color="darkgreen", size = 3) 
+
+```
+
+So, when we investigated the sentiment over the years from @fig-K, we noticed that plot **A** had always more positive than negative sentiment and has increased over the years. Except that during Mbeki's presidency in 2001, the negative sentiment for the trigrams surpassed the positive ones, perhaps because of the rise in HIV/AIDS in South Africa. Plot **B** shows the fluctuation in count of positive and negative sentiment throughout the years. It is worth noting that the positive sentiments were larger than the negative sentiments. Consider the positive sentiment, the fluctuations occurrences indicates the positive sentiment count in the previous year tend to be higher than the following year relative to the previous year. This means that the presidents were hopeful for country to implement the project as planned, however, in the following year they always have to deal with some societal or economic challenges which caused the drop in the positive sentiment. This observation was supported in @miranda2021exploring as well, meaning that in general that tends to be the case. Another interesting observation was that whenever there was a peak in negative sentiment, logically we would guess a drop in positive sentiment below the negative sentiment (i.e, more negative sentiment than positive sentiment). However, whenever the negative sentiment was very high, the positive sentiment also increased. That means whenever there's something bad happening, the politicians tend to cover it up with good or positive speeched to decrease tension and mask the actuality. Moreoverm the trends between the positive and negative sentiment had increased over the years and the sudden drop in positive and negative sentiment in 2020 was due to the global pandemic covid-19. So, as a final observation, it seemed as if over the years the South African presidents were improved and did better with an increasing trend in positive sentiment.
+
+
+```{r fig-K, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap=" Positive and negative trio of words (trigrams) sentiment over time (excluding 1-term presidents such as deKlerk and Motlanthe). **A** corresponds to how many more positive than negative trigrams (or vice versa) computed over the years [1994-2023]. So, the y-axis for **A** was calculated as *Sentiment = positive trigrams - negative trigrams*. **B** refers to the actual count of positive and negative trigrams throughout the same mentioned period. The bounding boxes indicate which part of this timeline belongs to the presidency period of Mandela, Mbeki, Zuma and Ramaphosa.", fig.width = 10, fig.height = 7}
+# combining above plots in one figure
+cowplot::plot_grid(overall_trigram_bing_sentiment_change_over_time, overall_pos_neg_trigram_fluctuation,
+                   nrow = 2, ncol = 1, labels = "AUTO", label_size = 10, label_x = 0)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ### Topic Modelling
+
+
+
 
 ```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -232,6 +1765,7 @@ sona_top_terms %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
+  labs(title = "Figure 1 : Top terms per LDA-generated topic - All Presidential Speeches") +
   scale_y_reordered()
 
 ```
@@ -246,14 +1780,27 @@ sona_documents <- tidy(sona_lda, matrix = "gamma")
 # Determine which president has the highest gamma score per topic
 sona_document_prob <- sona_documents %>%
   group_by(topic) %>%
-  slice_max(order_by = gamma, n = 1) %>%
-  ungroup()
+  slice_max(order_by = round(gamma, 3), n = 1) %>%
+  ungroup() %>% 
+  mutate(gamma = round(gamma, 3))
+
+colnames(sona_document_prob) <- c("President", "Topic", "Gamma")
+
+# Summarise the topic gamma values, and example words per topic
+topic_names <- c("Topic 1", "Topic 2", "Topic 3", "Topic 4", "Topic 5")
+topic_presidents <- c("deKlerk", "Mandela", "Mbeki", "Ramaphosa", "Zuma")
+topic_words <- c("constitution, change, improve, parliament, create", "nation, build, human, crime, job, address", "system, world, growth, poverty, challenge", "business, investment, build, growth, improve", "compratriot, water, education, community, plan")
+
+sona_topic_summary <- cbind(topic_names, topic_presidents, topic_words)
+colnames(sona_topic_summary) <- c("Topic", "President", "Example Words")
 
 ```
 
 
+
+
 ```{r topic.prob, echo=FALSE}
-#| label: tbl-cars
+#| label: tbl-probs
 #| tbl-cap: "President-Per-Topic Probabilities"
 #| tbl-colwidths: [60,20,20]
 
@@ -261,6 +1808,210 @@ sona_document_prob <- sona_documents %>%
 kable(sona_document_prob)
 ```
 
+From the LDA topic modelling on all speeches, there is a clear probalistic relationship between top 5 topics and which president each topic relates to.
+
+```{r topic.summary, echo=FALSE}
+#| label: tbl-topic-summary
+#| tbl-cap: "Topic Summaries"
+#| tbl-colwidths: [20,20, 60]
+
+kable(sona_topic_summary)
+```
+
+### A comparison of word differences between presidents 
+
+The comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challanges each faced.
+
+```{r lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# beta comparison of topic 1 and topic 2
+beta_wide <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic1 > .001 | topic2 > .001) %>%
+  mutate(log_ratio = log2(topic2 / topic1))
+
+# beta comparison of topic 3 and topic 4
+beta_wide2 <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic3 > .001 | topic4 > .001) %>%
+  mutate(log_ratio = log2(topic4 / topic3))
+
+# beta comparison of topic 4 and topic 5
+beta_wide3 <- sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic4 > .001 | topic5 > .001) %>%
+  mutate(log_ratio = log2(topic5 / topic4))
+
+par(mfrow=c(2,2))
+
+# Visualize first beta
+beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(8, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(title = 'Figure 2: Log2 ratio of beta in topic 2 (Mandela) / topic 1 (deKlerk)', y = 'Log ratio difference', x = 'Term') +
+  coord_flip()
+
+```
+
+The difference in beta (per-topic-word probabilities) between **Mandela** and **deKlerk** are displayed in *Figure 2*. 
+
+deKlerk made a single speech just before the 1994 democratic elections, expressing hope and optimism for a cohesive and cooperative future between all South Africans. 
+Mandela, by contrast, presided over South Africa for the first 5 years of its nascent democracy, and had to grapple and confront many of the social and economic challenges that it presented.
+
+The log ratios between both presidents' topic beta's is very low compared to other subsequent beta comparisons, however, suggesting much commonality in the topics they spoke about and perhaps also their writing styles.
+  
+```{r lda_beta2, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Visualize the second beta
+beta_wide2 %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(8, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(title = 'Figure 3: Log2 ratio of beta topic 3 (Mbeki) / topic 4 (Ramaphosa', y = 'Log ratio difference', x = 'Term') +
+  coord_flip()
+
+```
+
+A comparison of the words with greatest differences between **Mbeki** and **Ramaphosa** reveal how they dealt with very different agendas during their respective tenures. 
+
+Mbeki presided over the hosting of the 2010 FIFA World Cup (`soccer`, `cup`) whilst Ramaphosa had to deal with a global pandemic in 2020-2021 (`covid`, `pandemic`, `restore`) as well as the Eskom electricity crisis which had started already during Mbeki's presidency (`shed`, `SOEs`, `restore`). 
+
+On a side note, Mbeki appeared to be very fond of the phrase `"discharge their responsibilities"` which is why the word `discharge` stands out in the comparison.
+
+
+```{r lda_beta3, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+# Visualize the third beta
+beta_wide3 %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(8, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = "#478ACA")) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(title = 'Figure 4: Log2 ratio of beta topic 4 (Ramaphosa) / topic 5 (Zuma', y = 'Log ratio difference', x = 'Term') +
+  coord_flip()
+
+```
+
+A comparison of the words with greatest differences between **Ramaphosa** and **Zuma** reveal differences in their presidential styles. 
+
+Terms like `friend` and `compatriot` by Zuma's indicate his reliance on left-wing populist rhetoric in his speeches, whilst the use of terms like `SOEs` and `capture` by Ramaphosa suggest that Zuma did not to any same degree confront the issues of corruption and inefficiencies in state-owned-enterprises (including Eskom) that beset the legacy of his presidency (and which formed the basis of Ramaphosa's subsequent challenges).
+
+### Topic modelling against Ramaphosa's speeches
+
+```{r lda_beta4, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+ramaphosa_sona <- sona %>% filter(pres == "Ramaphosa")
+
+# turn into tidy text 
+tidy_ramaphosa_sona <- ramaphosa_sona %>% 
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>%
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%
+  dplyr::select(word, pres, date, filename) 
+
+ramaphosa_sona_tdf <- tidy_ramaphosa_sona %>%
+  group_by(filename,word) %>%
+  count() %>%  
+  ungroup()
+
+# Remove common SONA words that are used very regularly, but which don't convey too much meaning
+common_sona_reg <- 'wanna|madam|percent|speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+ramaphosa_sona_tdf <- ramaphosa_sona_tdf %>% filter(!grepl(common_sona_reg, word))
+
+dtm_ramaphosa_sona <- ramaphosa_sona_tdf %>% cast_dtm(filename, word, n)
+
+# Estimate the parameters of the topic model using LDA
+ramaphosa_sona_lda <- LDA(dtm_ramaphosa_sona, k = 4, control = list(seed = 2023))
+
+# Use the tidy() function by the  tidytext package 
+# for extracting the per-topic-per-word probabilities, called β (“beta”), from the model
+ramaphosa_sona_topics <- tidy(ramaphosa_sona_lda, matrix = "beta")
+
+ramaphosa_sona_top_terms <- ramaphosa_sona_topics %>%
+  group_by(topic) %>%
+  slice_max(beta, n = 20) %>% 
+  ungroup() %>%
+  arrange(topic, -beta)
+
+# Visualize using ggplot
+#ramaphosa_sona_top_terms %>%
+#  mutate(term = reorder_within(term, beta, topic)) %>%
+#  ggplot(aes(beta, term, fill = factor(topic))) +
+#  geom_col(show.legend = FALSE) +
+#  facet_wrap(~ topic, scales = "free") +
+#  labs(title = "Figure 5 : Top terms per LDA-generated topic - Ramaphosa Speeches") +
+#  scale_y_reordered()
+```
+
+
+```{r lda_beta5, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+ramaphosa_sona_documents <- tidy(ramaphosa_sona_lda, matrix = "gamma")
+
+# Determine which president has the highest gamma score per topic
+ramaphosa_sona_documents %>%
+  group_by(topic) %>%
+  slice_max(order_by = gamma, n = 1) %>%
+  ungroup()
+
+ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9) %>% mutate(gamma = round(gamma, 3))
+
+```
+
+```{r ram.prob, echo=FALSE}
+#| label: tbl-ram-probs
+#| tbl-cap: "Ramaphosa-Per-Topic Probabilities"
+#| tbl-colwidths: [60,20,20]
+
+# display the president per-topic probabilities
+# kable(ramaphosa_sona_documents)
+```
+
+
+```{r lda_beta6, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+
+ramaphosa_beta_wide <- ramaphosa_sona_topics %>%
+  mutate(topic = paste0("topic", topic)) %>%
+  pivot_wider(names_from = topic, values_from = beta) %>% 
+  filter(topic4 > .001 | topic3 > .001) %>%
+  mutate(log_ratio = log2(topic3 / topic4))
+
+# Visualize
+ramaphosa_beta_wide %>%
+  group_by(direction = log_ratio > 0) %>%
+  top_n(10, abs(log_ratio)) %>%
+  ungroup() %>%
+  mutate(term = reorder(term, log_ratio)) %>%
+  ggplot(aes(term, log_ratio, fill = "#478aca")) +
+  theme(legend.position = "none") +
+  geom_col() +
+  labs(title = 'Figure 5: Log2 ratio of beta in 2019 post-election speech / 2023 speech', y = 'Log ratio difference', x = 'Term') +
+  coord_flip()
+
+```
+
+We end the section of topic modelling with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023**. 
+
+Terms in 2019 included `dream`, `comfort`, `bold` and `NDP` (the *National Development Plan*, initiated in 2013, which aims to eliminate poverty and reduce inequality by 2030).
+
+Terms in the 2023 included `pandemic`, `disaster`, `overcome`, `transition`, and tellingly, not a single mention of the *National Development Plan*. 
+
+This suggests the use of optimistic and idealistic terms during an election year that support a political agenda, that is not evident in non-election years. 
 
 
 ## Discussion & Conclusion
