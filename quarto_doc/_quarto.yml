@@ -12,6 +12,8 @@ website:
         text: Assignment Submission
       - href: llm.qmd
         text: "Using ChatGPT as an LLM"
+      - href: tasks.qmd
+        text: "Task Breakdown"
 
 format:
   html:
