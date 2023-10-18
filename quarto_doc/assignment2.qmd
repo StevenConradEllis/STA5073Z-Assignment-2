@@ -10,7 +10,7 @@ author:
 title: A Descriptive Analysis of the South African Presidential State of the Nation Address (SONA) - 1994 to 2023
 keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
 abstract: |
- The annual State of the Nation Address (SONA) in South Africa serves as a critical     national update by the President, delivered to Parliament. This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study    aims to conduct sentiment analysis and topic modeling on these speeches, utilizing     analytical skills such as data cleaning, sentiment analysis, Latent Dirichlet          Allocation (LDA) for topic extraction, and trend identification.This paper provides    insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to     2023. {The following findings were discovered }
+ The annual State of the Nation Address (SONA) in South Africa serves as a critical national update by the President, delivered to Parliament. This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study aims to conduct sentiment analysis and topic modeling on these speeches, utilizing analytical skills such as data cleaning, sentiment analysis, Latent Dirichlet Allocation (LDA) for topic extraction, and trend identification.This paper provides insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to 2023. {The following findings were discovered}
 
 bibliography: bibliography_Tanweer.bib
 format:
@@ -1273,7 +1273,7 @@ cowplot::plot_grid(overall_trigram_bing_sentiment_change_over_time, overall_pos_
 
 ```
 
-```{r fig-R, echo=FALSE, eval=TRUE,warning=FALSE,fig.align='center',message=FALSE,fig.cap="Evolution of emotions expressed over time from 1994-2023 by all presidents"}
+```{r fig-R, echo=FALSE, eval=TRUE,warning=FALSE,fig.align='center',message=FALSE,fig.cap="Evolution of emotions expressed over time from 1994-2023 by all presidents.", fig.width = 10, fig.height = 6}
 # removing deKlerk and Motlanthe from the analysis as they made only 1 speech
 nrc_sona_tdf  <- nrc_sona_tdf  %>%
   filter(!pres %in% c('deKlerk', 'Motlanthe')) # excluding 1 time president
@@ -1295,10 +1295,11 @@ emotion_change_over_time <-emotion_change_over_time%>%
 emotion_change_over_time %>%
   ggplot(aes(x = speech_year, y = freq, colour = sentiment,group=sentiment)) +
   geom_line() +
-  geom_smooth(aes(colour = sentiment)) + ylab("frequency") + xlab("year")+
+  geom_smooth(aes(colour = sentiment)) + ylab("Frequency") + xlab("Year")+
   ggtitle("Emotion Change Over Time") +
-  theme(plot.title = element_text(size = 11))+ 
+  theme(plot.title = element_text(size = 11), legend.position = 'bottom')+ 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  labs(color = '') +
   geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 0.3),
             fill = "transparent", color = "deeppink3", size = .05 , linetype = '8f') + ggplot2::annotate(geom="text", x=1+.5, y=0.31, label="Mandela",color="deeppink3", size = 3) +
   geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 0.3),
@@ -1558,29 +1559,7 @@ Terms in the 2023 included `pandemic`, `disaster`, `overcome`, `transition`, and
 
 This suggests the use of optimistic and idealistic terms during an election year that support a political agenda, that is not evident in non-election years.
 
-## Review: Using ChatGPT as a Large Language Model
 
-Large Language Models (LLMs) are sophisticated artificial intelligence tools that assist with numerous tasks, such as compiling, processing, and writing reports, such as this one. ChatGPT, in particular, has shown remarkable capabilities in assisting with such tasks, and so it was used to assist with completing this task and the following is a detailed review of the experience.
-
-#### **Prompting for Writing:**
-
-When it came to the writing process, ChatGPT excelled when it was provided with detailed descriptions of what was required, often in concise bullet points. This structured approach allowed ChatGPT to address each point systematically. While it usually produced well-structured and coherent content, minor human adjustments were occasionally necessary for optimal results.
-
-Its performance deteriorated when clear and detailed instructions were not provided. In such cases, the results were less satisfactory, very generalized and often necessitated additional prompting or fine-tuning.
-
-#### **Prompting for Coding:**
-
-In the realm of coding, ChatGPT proved to be a valuable resource for understanding and debugging errors. When presented with coding errors, it demonstrated an impressive accuracy rate of identifying the root cause of the issue.
-
-Furthermore, for simpler or common coding exercises, ChatGPT typically provided effective solutions on the first attempt. However, it's with more complex coding problems, even when prompts were tuned, ChatGPT struggled to produce correct answers. This is perhaps indicative of the limitations of current AI models in handling intricate coding challenges.
-
-#### **Prompting for Facts and Definitions:**
-
-ChatGPT delivered accurate facts and definitions when prompted. However, due diligence remained essential, as the information provided was cross-checking for precision.
-
-One remarkable aspect of ChatGPT was its ability to explain topics comprehensively, providing definitions that allowed for a solid understanding of the subject matter. It excelled in generating examples and rephrasing information in simpler terms, which greatly aided in achieving a clear and thorough comprehension of the topics it addressed.
-
-In summary, ChatGPT has proven to be a valuable tool for a variety of tasks, particularly in the realm of report compilation, coding assistance, and knowledge provision. While it excels with well-defined and detailed prompts, its limitations become apparent when instructions are less clear or when confronted with intricate coding challenges. Nevertheless, ChatGPT's capabilities in simplifying complex concepts and generating good quality written content offer significant value in a variety of applications.
 
 # Conclusions
 
