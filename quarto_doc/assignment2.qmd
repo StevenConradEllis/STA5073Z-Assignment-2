@@ -10,7 +10,13 @@ author:
 title: A Descriptive Analysis of the South African Presidential State of the Nation Address (SONA) - 1994 to 2023
 keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
 abstract: |
- The annual State of the Nation Address (SONA) in South Africa serves as a critical national update by the President, delivered to Parliament. This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study aims to conduct sentiment analysis and topic modeling on these speeches, utilizing analytical skills such as data cleaning, sentiment analysis, Latent Dirichlet Allocation (LDA) for topic extraction, and trend identification.This paper provides insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to 2023. {The following findings were discovered}
+ The annual State of the Nation Address (SONA) in South Africa serves as a critical national update by the President, delivered to Parliament. 
+ 
+ This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study aims to conduct sentiment analysis and topic modeling on these speeches, utilizing analytical skills such as data cleaning, sentiment analysis, Latent Dirichlet Allocation (LDA) for topic extraction, and trend identification.This paper provides insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to 2023. 
+ 
+ Sentiment analysis revealed that presidential speeches are typically very positive, with strong elements of trust, anticipation, hope and optimism permeating their content. 
+ 
+ Topic modelling also revealed that the styles and content of SONA speeches are remarkably similar in nature. However, on close inspection, subtle topic differences revealed varying agendas, styles, priorities and challenges between presidents. These provided interesting insights into their characters, and the messages they deemed important in sharing with the nation.
 
 bibliography: bibliography_Tanweer.bib
 format:
@@ -1544,7 +1550,16 @@ Terms in the 2023 included `pandemic`, `disaster`, `overcome`, `transition`, and
 This suggests the use of optimistic and idealistic terms during an election year that support a political agenda, that is not evident in non-election years.
 
 
+# Conclusion
 
-# Conclusions
+The analysis of presidential speeches presented several important findings. It became evident that presidential speeches are typically characterized by a highly positive tone, with the predominant expression of emotions such as trust and anticipation. 
+
+These speeches reflect a consistent aspiration to inspire hope, confidence, and forward-looking optimism.
+Additionally, the topics covered in these speeches closely align with the current state of affairs and the goals the leaders intend to achieve. Each president's agenda is reflected in the themes they address, providing insight into the atmosphere of their era and the priorities they emphasize.
+
+The application of topic modeling proved to be a powerful analytical tool for summarizing extensive bodies of text. It facilitated the clustering of content into logical topics, revealing distinctive styles and agendas across different presidencies. This method was particularly illuminating in uncovering the changing priorities and evolving objectives of each president throughout their tenures.
+Moreover, the comparison of an individual president's speeches under topic modeling demonstrated dynamic changes and progressions over time. This dynamic nature suggests that a president's topic summaries can undergo significant alterations from one year to the next, reflecting the shifting landscape and challenges they address.
+
+In conclusion, the combined use of topic modeling and sentiment analysis offers a robust framework for dissecting presidential speeches and understanding the intricate dynamics of leadership and public communication. The potential for this approach to yield fresh insights and enhance our understanding of political discourse remains a promising avenue for future research.
 
 # References
