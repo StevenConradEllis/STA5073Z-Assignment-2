@@ -8,11 +8,10 @@ author:
     email: ELLSTE005@uct.ac.za
         
 title: A Descriptive Analysis of the South African Presidential State of the Nation Address (SONA) - 1994 to 2023
-keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
 abstract: |
  The annual State of the Nation Address (SONA) in South Africa serves as a critical national update by the President, delivered to Parliament. 
  
- This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study aims to conduct sentiment analysis and topic modeling on these speeches, utilizing analytical skills such as data cleaning, sentiment analysis, Latent Dirichlet Allocation (LDA) for topic extraction, and trend identification.This paper provides insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to 2023. 
+ This research examines SONA  speeches from 1994 to 2023, accessed from the official government website.The study aims to conduct sentiment analysis and topic modelling on these speeches, utilizing analytical skills such as data cleaning, sentiment analysis, latent dirichlet allocation (LDA) for topic extraction, and trend identification.This paper provides insights into how sentiments and key topics have evolved over time, offering a         comprehensive view of South Africa's political and societal landscape from 1994 to 2023. 
  
  Sentiment analysis revealed that presidential speeches are typically very positive, with strong elements of trust, anticipation, hope and optimism permeating their content. 
  
@@ -22,9 +21,12 @@ bibliography: bibliography_Tanweer.bib
 format:
    html:
       toc: true
+      toc-location: left
+      keywords: [SONA, text modelling, sentiment analysis, latent dirichlet allocation (LDA), tokenisation]
       toc-title: Contents
       embed-resources: true
       number-sections: true
+      fig-pos: '!ht'
 editor: source
 ---
 
@@ -152,16 +154,16 @@ sona <-sona %>%
 sona <- as.tibble(sona)
 
 ```
-\newpage 
+
 # Introduction
 
 The State of the Nation Address (SONA) is a crucial annual event in the political landscape of South Africa. It serves as a comprehensive summary of the nation's current status and a roadmap for its future. The address, delivered by the country's highest-ranking official, outlines achievements, priorities, and strategies for the upcoming year, significantly influencing policy, legislation, and public discourse.
 
-This research paper, undertakes a comprehensive descriptive examination of the content within South African State of the Nation Addresses (SONAs), employing advanced techniques in sentiment analysis and topic modeling. Sentiment analysis allows for the extraction and quantification of emotional and attitudinal tones within the speeches, providing deeper insights into the language used by leaders to engage, motivate, and influence their audience. Understanding prevailing sentiments also offers valuable context for assessing the reception and impact of the SONA.
+This research paper, undertakes a comprehensive descriptive examination of the content within South African State of the Nation Addresses (SONAs), employing advanced techniques in sentiment analysis and topic modelling. Sentiment analysis allows for the extraction and quantification of emotional and attitudinal tones within the speeches, providing deeper insights into the language used by leaders to engage, motivate, and influence their audience. Understanding prevailing sentiments also offers valuable context for assessing the reception and impact of the SONA.
 
-Furthermore, topic modeling enables the categorization of the diverse subjects addressed within these speeches. This approach clarifies the key areas of government focus and the shifting priorities as they evolve over time. It not only aids in identifying primary trends but also provides a quantitative basis for comparisons between different presidencies.
+Furthermore, topic modelling enables the categorization of the diverse subjects addressed within these speeches. This approach clarifies the key areas of government focus and the shifting priorities as they evolve over time. It not only aids in identifying primary trends but also provides a quantitative basis for comparisons between different presidencies.
 
-A comprehensive explanation of sentiment analysis and topic modeling, including a breakdown of their methodologies and an examination of the results as applied to the analysis of South African SONAs, are presented in relevant sections within this report.
+A comprehensive explanation of sentiment analysis and topic modelling, including a breakdown of their methodologies and an examination of the results as applied to the analysis of South African SONAs, are presented in relevant sections within this report.
 
 # Materials and Methods
 
@@ -179,15 +181,12 @@ Raw data retrieval tends to always be messy based on the overview given about th
 
 As an initial step prior to any analyses in the whole methodology section, if the tokenisation (refer to @sec-OverallAnalysis for an explanation on the concept of tokenisation) involved:
 
-```{=tex}
-\begin{enumerate}
-  \item  words, only the lowercase words would first be detected using the matching pattern \textbf{[a-z]} and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the \textbf{tidytext}  library would be removed as they do not convey valid information. In addition, some common and obvious words across all the speeches like "speaker", "madame", "honourable", "chairperson", "development", "national", "ensure", "deputy", "africa", "african", "africans", "south", "southern", "government", "people", "programme", "economic", "economy", "country" and "continue" which would act like noise in our analyses would be filtered out.
+1. words, only the lowercase words would first be detected using the matching pattern `[a-z]` and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the `tidytext`  library would be removed as they do not convey valid information. In addition, some common and obvious words across all the speeches like "speaker", "madame", "honourable", "chairperson", "development", "national", "ensure", "deputy", "africa", "african", "africans", "south", "southern", "government", "people", "programme", "economic", "economy", "country" and "continue" which would act like noise in our analyses would be filtered out.
   
-  \item  bigrams, each word would be separated into 2 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column.
+2. bigrams, each word would be separated into 2 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column.
   
-  \item  trigrams, each word would be separated into 3 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column.
-\end{enumerate}
-```
+3. trigrams, each word would be separated into 3 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column.
+
 ## Overall Analysis {#sec-OverallAnalysis}
 
 For any upcoming analyses, the speeches had to be tokenised accordingly to fit the purpose of our analyses. Tokenisation is the split of a sequence of characters in a text by locating the word boundaries [@palmer2000tokenisation]. The atomicity of the split could be in terms of per characters, per words, per n-grams, per sentences and more. So, tokenisation is always application dependent. For our purpose, tokenising per words and per n-grams were relevant. This was simply done using the `unnest_tokens()` function from the `tidytext` library. n-gram is a terminology very well known in the world of natural language processing (NLP), and it simply refers to a sequence of n words. If n=1, it is referred to as a unigram, if n=2, it is referred to as a bigram and if n=3, it is referred to as a trigram. The overall analysis sought to reveal the top 20 words, bigrams and trigrams used by all presidents. The steps to achieve these, followed the main procedures highlighted in @sec-PreliminaryProcedure1. Then for each case, the words, bigrams and trigrams were counted, sorted in descending order and sliced to the first 20 elements. Furthermore, they were all plotted as barplots.
@@ -198,13 +197,10 @@ A more in-depth overall analysis was performed by aggregating the above per pres
 
 This procedure is sentiment-focused rather than use for an overall analysis purpose. Nevertheless, it follows similar steps as in @sec-PreliminaryProcedure1 with slight updates. Note that the words and bigrams part were omitted here based on the aforementioned argument in @sec-OverallAnalysis. As usual, an initial step prior to any sentiment analyses, if the tokenisation involved:
 
-```{=tex}
-\begin{enumerate}
-  \item  words, only the lowercase words would first be detected using the matching pattern \textbf{[a-z]} and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the \textbf{tidytext} library would be removed as they do not convey valid information. The same common and obvious words across all the speeches as detailed in Section \ref{sec-PreliminaryProcedure1} would act like noise in our analyses, hence would be filtered out. The relevant dictionary (further description about dictionaries is detailed in Section \ref{sec-SentimentAnalysisMethodology}) would be left joined to the cleaned dataset on the words so that the words in the speeches would have a sentiment attached to it. Obviously, not all the words in the speeches would be present in the dictionaries. Therefore, words that did not have a label would be mutated to "neutral".
+1. words, only the lowercase words would first be detected using the matching pattern `[a-z]` and filtered. Then, the stop words (i.e, prepositions and connecting words) from the SMART lexicon of the `tidytext` library would be removed as they do not convey valid information. The same common and obvious words across all the speeches as detailed in Section @sec-PreliminaryProcedure1 would act like noise in our analyses, hence would be filtered out. The relevant dictionary (further description about dictionaries is detailed in Section @sec-SentimentAnalysisMethodology) would be left joined to the cleaned dataset on the words so that the words in the speeches would have a sentiment attached to it. Obviously, not all the words in the speeches would be present in the dictionaries. Therefore, words that did not have a label would be mutated to "neutral".
 
-  \item  trigrams, each word would be separated into 3 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column. Because we would deal with trigrams, the sentiments would have to be polarised (i.e, "positive" = 1, "neutral" = 0 and "negative" = -1) in order to be able to calculate a final sentiment score for all the trio of words. That would be based on the sum of all polarised sentiment belonging to each trio of words. Moreover, if the final sentiment score = 0, the trigrams would remain as "neutral". If the final sentiment score $\geq$ 1, the trigrams would be "positive" and if the final sentiment score < 1, the trigrams would be "negative".
-\end{enumerate}
-```
+2. trigrams, each word would be separated into 3 different columns and then step 1 would be repeated for each column. Then the cleaned separated words would be united back in one column. Because we would deal with trigrams, the sentiments would have to be polarised (i.e, "positive" = 1, "neutral" = 0 and "negative" = -1) in order to be able to calculate a final sentiment score for all the trio of words. That would be based on the sum of all polarised sentiment belonging to each trio of words. Moreover, if the final sentiment score = 0, the trigrams would remain as "neutral". If the final sentiment score $\geq$ 1, the trigrams would be "positive" and if the final sentiment score < 1, the trigrams would be "negative".
+
 ## Sentiment Analysis {#sec-SentimentAnalysisMethodology}
 
 According to @medhat2014sentiment, sentiment analysis also known as the opinion mining study people's opinions, attitudes, and emotions towards an entity in a computational manner and can also be considered as a classification process. Our sentiment analysis took a lexicon dictionary-based approach which is considered as a very feasible approach as it does not involve any training data and advanced machine learning techniques [@wankhade2022survey]. For this reason, some experts like @yan2010integrating also referred to this approach as an unsupervised approach. The 2 main dictionaries used in our analyses were `bing` and `nrc`.
@@ -213,7 +209,7 @@ The `bing` dictionary was loaded from the `tidytext` library. Each of the 6786 w
 
 A more in-depth sentiment analysis was performed by aggregating the above per president. The exact methods explained in the above paragraph were implemented with the exception that the presidents were first filtered in that same procedural pipeline. It was also vital to investigate the variation of positive and negative sentiments over the years while excluding deKlerk and Motlanthe as they were only 1-term presidents. Those investigations were done for the trigrams by following the procedure as described in @sec-PreliminaryProcedure2 and then plotted as barplots and line graphs. The only key aspect here was to group the sentiment and year before counting how many positive and negative sentiments were recorded per year.
 
-This report also employed the **NRC Emotion Lexicon** for sentimental analysis, a resource that associates English words with eight fundamental emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust), along with two sentiments (negative and positive). This lexicon was used to analyse the emotions expressed in presidential speeches, providing insights into the emotional aspects of their leadership and communication.
+As mentioned above, this report also employed the `nrc` dictionary for sentimental analysis, a resource that associates English words with eight fundamental emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust), along with two sentiments (negative and positive). This lexicon was used to analyse the emotions expressed in presidential speeches, providing insights into the emotional aspects of their leadership and communication.
 
 ```{r nrc-cleaning, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -264,20 +260,20 @@ bing <- get_sentiments('bing')
 nrc <- get_sentiments('nrc') 
 #unique(nrc$sentiment)
 
-save(bing, nrc, file = "dsfi-lexicons.Rdata")
+#save(bing, nrc, file = "dsfi-lexicons.Rdata")
 ```
 
 ## Topic Modelling
 
-Topic modelling is a machine learning technique that scans tokens (usually words) in sequences (usually documents), with the aim of detecting word and phrase patterns within the sequences. This is achieved by clustering word groups and similar expressions together into 'topics' that best characterize a set of documents. [@Pascual2019]
+Topic modelling is a machine learning technique that scans tokens (usually words) in sequences (usually documents), with the aim of detecting word and phrase patterns within the sequences. This is achieved by clustering word groups and similar expressions together into 'topics' that best characterize a set of documents [@Pascual2019].
 
-Topic models can help offer insights into bodies of text, for better understanding of large collections of unstructured text bodies. [@Blei2012]
+Topic models can help offer insights into bodies of text, for better understanding of large collections of unstructured text bodies [@Blei2012].
 
 In this assignment topic modelling was performed as follows:
 
 A data-set of words that appeared in the corpus of presidential speeches was extracted into a **document-term matrix**, containing rows corresponding to the speeches and columns corresponding to the words.
 
-The **Latent Dirichlet allocation (LDA)** method was then used to extract topics from this sparse and wide document-term matrix. The LDA algorithm is guided by two principles:
+The **latent dirichlet allocation (LDA)** method was then used to extract topics from this sparse and wide document-term matrix. The LDA algorithm is guided by two principles:
 
 -   Every document is a mixture of *topics* (for example 90% topic A and 10% topic B) and every topic is a mixture of *words*.
 -   Every topic is a probability distribution over words.
@@ -419,8 +415,7 @@ overall_common_trigram <- sona_sentiment %>%
 
 An overall analysis was executed on the speeches to extract the top 20 words, bigrams and trigrams used by all the presidents to obtain an idea about which of those conveyed meaningful information.
 
-@fig-A represents the top 20 words, bigrams and trigrams used by all presidents. Plot **A** showcases that all presidents would obviously address the public most of the time. Moreover, the top words were linked to development and were very businessy. Plot **B** were way more meaningful than plot **A** and it seemed like majority of presidents were addressing private sectors more than public sectors in their speeches. They addressed the unity of nations, job creations, justice system and specific locations in South Africa. Mandela seemed to have been a model to the other presidents being the first anti-apartheid activist and president of the country, hence mentioned several times. The 2010 FIFA world cup that was held in South Africa brought such a positive and festive vibe in Cape Town, no wonder why it was in the top 20 bigrams. Plot **C** was even more meaningful and we could observe that the bigram "justice system" and "criminal justice" were the least occurred words in the top 20 bigram plot. That was because those particular bigrams were not that meaningful, as such plot **C**
-
+@fig-A represents the top 20 words, bigrams and trigrams used by all presidents. Plot **A** showcases that all presidents would obviously address the public most of the time. Moreover, the top words were linked to development and were very businessy. Plot **B** were way more meaningful than plot **A** and it seemed
 ```{r fig-A, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 words, pair of words (bigrams), and trio of words (trigrams) used by all presidents.", fig.width = 10}
 
 # combining above plots in one figure
@@ -428,8 +423,7 @@ cowplot::plot_grid(overall_common_words, overall_common_bigram, overall_common_t
                    nrow = 1, ncol = 3, labels = "AUTO", label_size = 6, label_x = 0) +
   theme(plot.background = element_rect(color = "black", linewidth = 2))
 ```
-
-revealed the real meaning of the words being criminal justice system, hence that trigram had the highest occurrence. In addition, a lot of projects like trade union movement, public private partnership, child support grant, adult basic education, continental free trade, community of forum and more were the subject matter amid presidents. The economy of the country was also address in terms of the gross domestic product (GDP), however, problems like gender-based violence outweighed the number of occurrences for the country's GDP, and this priority was valid here.
+like majority of presidents were addressing private sectors more than public sectors in their speeches. They addressed the unity of nations, job creations, justice system and specific locations in South Africa. Mandela seemed to have been a model to the other presidents being the first anti-apartheid activist and president of the country, hence mentioned several times. The 2010 FIFA world cup that was held in South Africa brought such a positive and festive vibe in Cape Town, no wonder why it was in the top 20 bigrams. Plot **C** was even more meaningful and we could observe that the bigram "justice system" and "criminal justice" were the least occurred words in the top 20 bigram plot. That was because those particular bigrams were not that meaningful, as such plot **C** revealed the real meaning of the words being criminal justice system, hence that trigram had the highest occurrence. In addition, a lot of projects like trade union movement, public private partnership, child support grant, adult basic education, continental free trade, community of forum and more were the subject matter amid presidents. The economy of the country was also address in terms of the gross domestic product (GDP), however, problems like gender-based violence outweighed the number of occurrences for the country's GDP, and this priority was valid here.
 
 ```{r Top 20 trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 
@@ -545,8 +539,7 @@ common_trigram_Ramaphosa <- sona_sentiment %>%
 
 ```
 
-@fig-C displays the top 20 trigrams per president. Mandela's trigrams clearly indicated the challenges and priorities, he was dealing at his time of presidency. Without re-emphasising on the trigrams, here's a brief overiew. Mandela's commitment to address social issues, improving public services, maintaining law and order, promoting workers' rights, and ensuring a strong constitutional framework has not gone unnoticed. Once again, his presidency was characterized by a focus on reconciliation and inclusivity, as well as engagement with international matters. Overall, Mandela's presidency was marked by his dedication to nation-building, social progress, and upholding democratic values. Due to the fact that deKlerk was only a 1-term president, all his top words had only a count of 1. Once again, the word constitution appeared multiple times. Indeed, he was dealing with a period of significant political transformation in South Africa. He was therefore working on constitutional negotiations, peace-building, and addressing political and social challenges. His presidency was marked by efforts to move away from apartheid policies and towards a more inclusive and democratic system. Mbeki's top tier words looked quite diverse. He appeared to address issues related to security, governance, economic development, and education. Moreover, the focus on major sporting events like the soccer world cup suggested a commitment to the country's international standing and promoting sports. Additionally, the reference to traditional leadership and community centres indicated engagement with South Africa's cultural and local governance dynamics. As per the top 20 trigrams for Zuma, he seemed to have focused on economic policies, infrastructure development, and addressing corruption. Apart from the social and economic programs, he had to host the 2010 FIFA world cup during his tenure. Motlanthe's trigrams was not that helpful as he was also only a 1-term president. His top 20 trigrams did not convey meaningful information. The only observation was that it appeared that he may have been dealing with a range of complex challenges, with a focus on social and economic development, justice and anti-corruption. Ramaphosa's trigrams sounded very promising and he seemed to have focused on addressing a wide range of issues, including social challenges like gender-based violence, economic development through trade and job creation, legal and constitutional matters, and engagement with various communities and organizations. His governance reflects a multifaceted approach with policy-making aimed at addressing both immediate and long-term challenges facing South Africa. An observation was made that across the trigrams per president, criminal justice system has appeared various time, which also means that crime is still a persistent problem in South Africa.
-
+@fig-C displays the top 20 trigrams per president. Mandela's trigrams clearly indicated the challenges and priorities, he was dealing at his time of presidency. Without re-emphasising on the trigrams, here's a brief overiew. Mandela's commitment to address social issues, improving public services, maintaining law and order, promoting workers' rights, and ensuring a strong constitutional framework has not gone unnoticed. Once again, his presidency was characterized by a focus on reconciliation and inclusivity, as well as engagement with international matters. Overall, Mandela's presidency was marked by his dedication to nation-building, social progress, and upholding democratic values. Due to the fact that deKlerk was only a 1-term president, all his top words had only a count of 1. Once again, the word constitution appeared multiple times. Indeed, he was dealing with a period of significant political
 ```{r fig-C, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 trio of words (trigrams) used by each president. **A** relates to Mandela's trigrams, **B** relates to deKlerk's trigrams, **C** relates to Mbeki's trigrams, **D** relates to Zuma's trigrams, **E** relates to Motlanthe's trigrams, and **F** relates to Ramaphosa's trigrams.", fig.width = 10, fig.height = 10}
 # combining above plots in one figure
 cowplot::plot_grid(common_trigram_Mandela, common_trigram_deKlerk,
@@ -555,6 +548,8 @@ cowplot::plot_grid(common_trigram_Mandela, common_trigram_deKlerk,
                    nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0) +
   theme(plot.background = element_rect(color = "black", linewidth = 2))
 ```
+transformation in South Africa. He was therefore working on constitutional negotiations, peace-building, and addressing political and social challenges. His presidency was marked by efforts to move away from apartheid policies and towards a more inclusive and democratic system. Mbeki's top tier words looked quite diverse. He appeared to address issues related to security, governance, economic development, and education. Moreover, the focus on major sporting events like the soccer world cup suggested a commitment to the country's international standing and promoting sports. Additionally, the reference to traditional leadership and community centres indicated engagement with South Africa's cultural and local 
+governance dynamics. As per the top 20 trigrams for Zuma, he seemed to have focused on economic policies, infrastructure development, and addressing corruption. Apart from the social and economic programs, he had to host the 2010 FIFA world cup during his tenure. Motlanthe's trigrams was not that helpful as he was also only a 1-term president. His top 20 trigrams did not convey meaningful information. The only observation was that it appeared that he may have been dealing with a range of complex challenges, with a focus on social and economic development, justice and anti-corruption. Ramaphosa's trigrams sounded very promising and he seemed to have focused on addressing a wide range of issues, including social challenges like gender-based violence, economic development through trade and job creation, legal and constitutional matters, and engagement with various communities and organizations. His governance reflects a multifaceted approach with policy-making aimed at addressing both immediate and long-term challenges facing South Africa. An observation was made that across the trigrams per president, criminal justice system has appeared various time, which also means that crime is still a persistent problem in South Africa.
 
 ## Sentiment Analysis
 
@@ -653,8 +648,6 @@ overall_common_negative_trigrams <- sona_sentiment %>%
 
 Plot **A** of @fig-H is a typical example of the presidents trying to improve the well-being of the local population, especially those who live in informal settlements suffering from basic amenities. So, the positive trigrams highlighted a range of policy areas, projects and achievements, including social welfare, economic development, public services, infrastructure, and international engagement.
 
-For plot **B**, there were several words like gross domestic product, crime prevention strategy, sexual offence court, prosecute authority npa, sexual office unit, passenger rail agency, gross fix capital, fight organise crime, emergency task team, corruption task team, and corruption advisory council which should not have been categorised as negative sentiment. Nevertheless, the problem for crime seemed persistent which was why a criminal justice system needed refinement. Although the criminal justice system is a positive sentiment, we treated it as negative because if there were no crimes, it would be pointless to have a criminal justice system. So, its existence entailed the unsolved problem of crime in the country. In fact, the same logic could be argued with regards to sexual offence court.
-
 ```{r fig-H, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive (**A**) and negative (**B**) trio of words (trigrams) used by all presidents.", fig.width = 10}
 
 # combining above plots in one figure
@@ -663,6 +656,10 @@ cowplot::plot_grid(overall_common_positive_trigrams, overall_common_negative_tri
   theme(plot.background = element_rect(color = "black", linewidth = 2))
 
 ```
+
+For plot **B**, there were several words like gross domestic product, crime prevention strategy, sexual offence court, prosecute authority npa, sexual office unit, passenger rail agency, gross fix capital, fight organise crime, emergency task team, corruption task team, and corruption advisory council which should not have been categorised as negative sentiment. Nevertheless, the problem for crime seemed persistent which was why a criminal justice system needed refinement. Although the criminal justice system is a positive sentiment, we treated it as negative because if there were no crimes, it would be pointless to have a criminal justice system. So, its existence entailed the unsolved problem of crime in the country. In fact, the same logic could be argued with regards to sexual offence court.
+
+
 
 ```{r Top 20 positive trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 # Most common positive trigrams used per president ------------------------
@@ -901,8 +898,7 @@ Ramaphosa_common_positive_trigrams <- sona_sentiment %>%
 
 ```
 
-@fig-I depicts the positive sentiment of trigrams per president. Mandela's positive sentiment focused on social welfare, economic development, social justice, reconciliation, and peace. He worked to create a more inclusive and just society while addressing a range of challenges, both domestic and international. He wanted to promote black empowerment as he was fighting for the abolition of apartheid. So, Mandela's commitment to building a post-apartheid South Africa that was democratic, equitable, and prosperous is still engraved in our heart. His main priority seemed to be the provision for free medical care. Since deKlerk was only a 1-term president, only 9 unique positive trigrams were obtained. His focus on building trust, finding practical solutions, and ensuring genuine autonomy and constitutional safeguards indicated a commitment to resolving issues related to apartheid, political reform, and peace-building. It was consistent with his role in initiating negotiations to end apartheid and lead South Africa towards a more inclusive and democratic future. The top 20 positive sentiment trigrams for Mbeki was focused on infrastructure and basic amenities development, social welfare, economic growth, and international cooperation (i.e, afro-asian solidarity). He definitely tried to promote unity and solidarity in South Africa. Zuma's positive sentiment trigrams showcased an all-rounded presidency with a focus on social welfare, diplomacy, economic development, public health, and governance. The positive sentiment trigrams from Motlanthe also being a 1-term president aimed to address a range of issues, including economic growth, social welfare, competitiveness, equitable development, and infrastructure improvement. His administration appeared to have focused on creating a more inclusive and socially responsible society, with an emphasis on social support, economic stability, and equitable access to healthcare. It was no surprise to see that continental free trade was the first positive sentiment trigram for Ramaphosa, as he is always very business-oriented. He was really dedicated to economic growth, social inclusivity, diplomacy, democratic governance, and addressing pressing issues such as land reform and healthcare. He seemed to also focus on collaborative efforts and comprehensive planning to address the nation's challenges and drive progress. Overall, it was observed that most presidents were promoting child support grant and free basic amenities and clean water.
-
+@fig-I depicts the positive sentiment of trigrams per president. Mandela's positive sentiment focused on social welfare, economic development, social justice, reconciliation, and peace. He worked to create a more inclusive and just society while addressing a range of challenges, both domestic and international. He wanted to promote black empowerment as he was fighting for the abolition of apartheid. So, Mandela's commitment to building a post-apartheid South Africa that was democratic, equitable, and prosperous is still engraved in our heart. His main priority seemed to be the provision for free medical care. Since deKlerk was only a 1-term president, only 9 unique positive trigrams were obtained. His focus on building trust, finding practical solutions, and ensuring genuine autonomy and constitutional safeguards indicated a commitment to resolving issues related to apartheid, political reform, and peace-building. It was consistent with his role in initiating negotiations to end apartheid and lead South Africa towards a more 
 ```{r fig-I, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 positive trio of words (trigrams) used by each president. **A** relates to Mandela's positive trigrams, **B** relates to deKlerk's positive trigrams, **C** relates to Mbeki's positive trigrams, **D** relates to Zuma's positive trigrams, **E** relates to Motlanthe's positive trigrams, and **F** relates to Ramaphosa's positive trigrams.", fig.width = 10, fig.height = 10}
 # combining above plots in one figure
 cowplot::plot_grid(Mandela_common_positive_trigrams, deKlerk_common_positive_trigrams,
@@ -911,6 +907,9 @@ cowplot::plot_grid(Mandela_common_positive_trigrams, deKlerk_common_positive_tri
                    nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
   theme(plot.background = element_rect(color = "black", linewidth = 2))
 ```
+inclusive and democratic future. The top 20 positive sentiment trigrams for Mbeki was focused on infrastructure and basic amenities development, social welfare, economic growth, and international cooperation (i.e, afro-asian solidarity). He definitely tried to promote unity and solidarity in South Africa. Zuma's positive sentiment trigrams showcased an all-rounded presidency with a focus on social welfare, diplomacy, economic development, public health, and governance. The positive sentiment trigrams from Motlanthe also being a 1-term president aimed to address a range of issues, including economic growth, social welfare, competitiveness, equitable development, and infrastructure improvement. His administration appeared to have focused on creating a more inclusive and socially responsible society, with an emphasis on social support, economic stability, and equitable access to healthcare. It was no surprise to see that continental free trade was the first positive sentiment trigram for Ramaphosa, as he is always very business-oriented. He was really dedicated to economic growth, social inclusivity, diplomacy, democratic governance, and addressing pressing issues such as land reform and healthcare. He seemed to also focus on collaborative efforts and comprehensive planning to address the nation's challenges and drive progress. Overall, it was observed that most presidents were promoting child support grant and free basic amenities and clean water.
+
+
 
 ```{r Top 20 negative trigrams used by each of the presidents, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 # Most common negative trigrams used per president ------------------------
@@ -1147,8 +1146,7 @@ Ramaphosa_common_negative_trigrams <- sona_sentiment %>%
   scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
 ```
 
-@fig-J illustrates the negative sentiment of trigrams per president. Mandela's presidency emphasised on inclusivity, human rights and social justice as mentioned before. During his time, he unfortunately had to deal with significant challenges, such as crime, corruption, land issues, child abuse and rape, poverty, and environmental concerns. The top 2 sentiments were rather positive, but crime related. Due to deKlerk being a 1-term president, he had only 5 unique negative sentiments trigrams which did not really convey much information apart from words like hopeless, hard negotiation, threaten, conflict and difficulty which only highlighted some challenges and hardships during his presidency without any specific context. Ignoring the trigrams which were supposed to have strictly positive sentiments like gross domestic product and post conflict reconstruction; the crime related matter kept on persisting with some other social matters, public health issues and other political challenges. Again, ignoring gross domestic product being a positive sentiment trigram, the crime issue were on top of the list during Zuma's presidency. Furthermore, he had to deal with corruption, economic challenges, infrastructural breakdown, and some social and environmental concerns. Motlanthe's was also a 1-term president and from the trigrams, "poverty decline substantially", "metric poverty decline", "input price decline", "hungry decline dramatically", "gross fix capital" and "gross domestic product" should be ignored and treated as positive sentiment. This was a good example of the disadvantages of using lexicon-dictionary based approach for sentiment analysis. Nevertheless, crime, inequality, security measure issue, economic issues, political challenges and illicit activities were still the major concerns during his presidency. We again see some false negative sentiment present in the trigrams for Ramaphosa. Ignoring those, he still had to deal with crime related issues, violence in public, poverty, insanitation, water shortage, drug trafficking, debt perhaps due to the global pandemic which he also mentioned. It was quite clear that throughout all these year the crime issues, poverty, and violence were not able to eradicate or at a bare minimum to mitigate.
-
+@fig-J illustrates the negative sentiment of trigrams per president. Mandela's presidency emphasised on inclusivity, human rights and social justice as mentioned before. During his time, he unfortunately had to deal with significant challenges, such as crime, corruption, land issues, child abuse and rape, poverty, and environmental concerns. The top 2 sentiments were rather positive, but crime related. Due to deKlerk being a 1-term president, he had only 5 unique negative sentiments trigrams which did not really convey much information apart from words like hopeless, hard negotiation, threaten, conflict and difficulty which only highlighted some challenges and hardships during his presidency without any specific context. Ignoring the trigrams which were supposed to have strictly positive sentiments like gross domestic product and post conflict reconstruction; the crime related matter kept on persisting with some other social matters, public health issues and other political challenges. Again, ignoring gross domestic product
 ```{r fig-J, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Top 20 negative trio of words (trigrams) used by each president. **A** relates to Mandela's negative trigrams, **B** relates to deKlerk's negative trigrams, **C** relates to Mbeki's negative trigrams, **D** relates to Zuma's negative trigrams, **E** relates to Motlanthe's negative trigrams, and **F** relates to Ramaphosa's negative trigrams.", fig.width = 10, fig.height = 10}
 # combining above plots in one figure
 cowplot::plot_grid(Mandela_common_negative_trigrams, deKlerk_common_negative_trigrams,
@@ -1157,6 +1155,9 @@ cowplot::plot_grid(Mandela_common_negative_trigrams, deKlerk_common_negative_tri
                    nrow = 3, ncol = 2, labels = "AUTO", label_size = 10, label_x = 0)+
   theme(plot.background = element_rect(color = "black", linewidth = 2))
 ```
+being a positive sentiment trigram, the crime issue were on top of the list during Zuma's presidency. Furthermore, he had to deal with corruption, economic challenges, infrastructural breakdown, and some social and environmental concerns. Motlanthe's was also a 1-term president and from the trigrams, "poverty decline substantially", "metric poverty decline", "input price decline", "hungry decline dramatically", "gross fix capital" and "gross domestic product" should be ignored and treated as positive sentiment. This was a good example of the disadvantages of using lexicon-dictionary based approach for sentiment analysis. Nevertheless, crime, inequality, security measure issue, economic issues, political challenges and illicit activities were still the major concerns during his presidency. We again see some false negative sentiment present in the trigrams for Ramaphosa. Ignoring those, he still had to deal with crime related issues, violence in public, poverty, insanitation, water shortage, drug trafficking, debt perhaps due to the global pandemic which he also mentioned. It was quite clear that throughout all these year the crime issues, poverty, and violence were not able to eradicate or at a bare minimum to mitigate.
+
+
 
 ```{r positive and negative trigrams sentiment over time, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
 # Overall change in trigram sentiment over time ---------------------------
@@ -1261,7 +1262,7 @@ overall_pos_neg_trigram_fluctuation <- sona_sentiment %>%
 
 ```
 
-So, when we investigated the sentiment over the years from @fig-K, we noticed that plot **A** had always more positive than negative sentiment and has increased over the years. Except that during Mbeki's presidency in 2001, the negative sentiment for the trigrams surpassed the positive ones, perhaps because of the rise in HIV/AIDS in South Africa. Plot **B** shows the fluctuation in count of positive and negative sentiment throughout the years. It is worth noting that the positive sentiments were larger than the negative sentiments. Consider the positive sentiment, the fluctuations occurrences indicates the positive sentiment count in the previous year tend to be higher than the following year relative to the previous year. This means that the presidents were hopeful for country to implement the project as planned, however, in the following year they always have to deal with some societal or economic challenges which caused the drop in the positive sentiment. This observation was supported in @miranda2021exploring as well, meaning that in general that tends to be the case. Another interesting observation was that whenever there was a peak in negative sentiment, logically we would guess a drop in positive sentiment below the negative sentiment (i.e, more negative sentiment than positive sentiment). However, whenever the negative sentiment was very high, the positive sentiment also increased. That means whenever there's something bad happening, the politicians tend to cover it up with good or positive speeched to decrease tension and mask the actuality. Moreoverm the trends between the positive and negative sentiment had increased over the years and the sudden drop in positive and negative sentiment in 2020 was due to the global pandemic covid-19. So, as a final observation, it seemed as if over the years the South African presidents were improved and did better with an increasing trend in positive sentiment.
+So, when we investigated the sentiment over the years from @fig-K, we noticed that plot **A** had always more positive than negative sentiment and has increased over the years. Except that during Mbeki's presidency in 2001, the negative sentiment for the trigrams surpassed the positive ones, perhaps because Mbeki's was quite open in articulating the problem the country was facing and what prevention campaigns and other projects they had to work on. The issues he was dealing with in his speech was mainly related to xenophobia, economic issues, corruption and a lot of health challenges the population was facing. Plot **B** shows the fluctuation in count of positive and negative sentiment throughout the years. It is worth noting that the positive sentiments were larger than the negative sentiments. Consider the positive
 
 ```{r fig-K, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap=" Positive and negative trio of words (trigrams) sentiment over time (excluding 1-term presidents such as deKlerk and Motlanthe). **A** corresponds to how many more positive than negative trigrams (or vice versa) computed over the years [1994-2023]. So, the y-axis for **A** was calculated as *Sentiment = positive trigrams - negative trigrams*. **B** refers to the actual count of positive and negative trigrams throughout the same mentioned period. The bounding boxes indicate which part of this timeline belongs to the presidency period of Mandela, Mbeki, Zuma and Ramaphosa.", fig.width = 10, fig.height = 7}
 # combining above plots in one figure
@@ -1270,6 +1271,10 @@ cowplot::plot_grid(overall_trigram_bing_sentiment_change_over_time, overall_pos_
 
 ```
 
+sentiment, the fluctuations occurrences indicates the positive sentiment count in the previous year tend to be higher than the following year relative to the previous year. This means that the presidents were hopeful for country to implement the project as planned, however, in the following year they always have to deal with some societal or economic challenges which caused the drop in the positive sentiment. This observation was supported in @miranda2021exploring as well, meaning that in general that tends to be the case. Another interesting observation was that whenever there was a peak in negative sentiment, logically we would guess a drop in positive sentiment below the negative sentiment (i.e, more negative sentiment than positive sentiment). However, whenever the negative sentiment was very high, the positive sentiment also increased. That means whenever there's something bad happening, the politicians tend to cover it up with good or positive speeched to decrease tension and mask the actuality. Moreover the trends between the positive and negative sentiment had increased over the years and the sudden drop in positive and negative sentiment in 2020 was due to the global pandemic covid-19. So, as a final observation, it seemed as if over the years the South African presidents were improved and did better with an increasing trend in positive sentiment.
+
+
+In @fig-R, we observe the evolution of emotional dynamics over time. Notably, there is a distinct upswing in the expression of positive emotions, particularly from 2009 when President Zuma assumed office. This
 ```{r fig-R, echo=FALSE, eval=TRUE,warning=FALSE,fig.align='center',message=FALSE,fig.cap="Evolution of emotions expressed over time from 1994-2023 by all presidents.", fig.width = 10, fig.height = 6}
 # removing deKlerk and Motlanthe from the analysis as they made only 1 speech
 nrc_sona_tdf  <- nrc_sona_tdf  %>%
@@ -1293,7 +1298,7 @@ emotion_change_over_time %>%
   ggplot(aes(x = speech_year, y = freq, colour = sentiment,group=sentiment)) +
   geom_line() +
   geom_smooth(aes(colour = sentiment)) + ylab("Frequency") + xlab("Year")+
-  ggtitle("Emotion Change Over Time") +
+  ggtitle("Emotion change over time") +
   theme(plot.title = element_text(size = 11), legend.position = 'bottom')+ 
   theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
   labs(color = '') +
@@ -1307,11 +1312,10 @@ emotion_change_over_time %>%
             fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25+.8, y=0.31, label="Ramaphosa",color="darkgreen", size = 3)
  
 ```
-
-In @fig-R, we observe the evolution of emotional dynamics over time. Notably, there is a distinct upswing in the expression of positive emotions, particularly from 2009 when President Zuma assumed office. This trend potentially signifies President Zuma's leadership style, which may have prioritized positivity, unity, and motivation. Alternatively, it could imply that his speeches served as a means of crisis management, offering reassurance to the public and reinforcing the notion of stability and control during challenging times. We can observe a significant increase in negative emotions during the time frame spanning 2021 to 2023, marked notably by heightened expressions of fear and sadness. This trend can be traced back to the profound global impact of the novel coronavirus, which affected nations worldwide in 2020.
+trend potentially signifies President Zuma's leadership style, which may have prioritized positivity, unity, and motivation. Alternatively, it could imply that his speeches served as a means of crisis management, offering reassurance to the public and reinforcing the notion of stability and control during challenging times. We can observe a significant increase in negative emotions during the time frame spanning 2021 to 2023, marked notably by heightened expressions of fear and sadness. This trend can be traced back to the profound global impact of the novel coronavirus, which affected nations worldwide in 2020.
 
 ## Topic Modelling
-
+From the LDA topic modelling on all speeches in @fig-lda_graph1, there is a clear probabilistic relationship 
 ```{r fig-lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE,fig.align='center', fig.cap="Top terms per LDA-generated topic - all presidential speeches", fig.width = 10, fig.height = 7}
 
 # Visualize top terms per topic using ggplot
@@ -1360,7 +1364,7 @@ colnames(sona_topic_summary) <- c("Topic", "President", "Example Words")
 kable(sona_document_prob)
 ```
 
-From the LDA topic modelling on all speeches in @fig-lda_graph1, there is a clear probabilistic relationship between top 5 topics and which president each topic relates to (see @tbl-probs), which is summarised in @tbl-topic-summary below.
+between top 5 topics and which president each topic relates to (see @tbl-probs), which is summarised in @tbl-topic-summary below.
 
 ```{r tbl-topic-summary, echo=FALSE}
 #| label: tbl-topic-summary
@@ -1372,6 +1376,8 @@ kable(sona_topic_summary)
 
 A comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challenges each faced.
 
+
+The difference in beta (per-topic-word probabilities) between **Mandela** and **deKlerk** are displayed in @fig-lda_beta1.
 ```{r fig-lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta in topic 2 (Mandela) / topic 1 (deKlerk)", fig.width = 10}
 
 # beta comparison of topic 1 and topic 2
@@ -1410,12 +1416,11 @@ beta_wide %>%
   coord_flip()
 
 ```
-
-The difference in beta (per-topic-word probabilities) between **Mandela** and **deKlerk** are displayed in @fig-lda_beta1.
-
 deKlerk made a single speech just before the 1994 democratic elections, expressing hope and optimism for a cohesive and cooperative future between all South Africans. Mandela, by contrast, presided over South Africa for the first 5 years of its nascent democracy, and had to grapple and confront many of the social and economic challenges that it presented.
 
 The log ratios between both presidents' topic beta's is very low compared to other subsequent beta comparisons, however, suggesting much commonality in the topics they spoke about and perhaps also their writing styles.
+
+A comparison of the words with greatest differences between **Mbeki** and **Ramaphosa** in @fig-lda_beta2 reveal how they dealt with very different agendas during their respective tenures.
 
 ```{r fig-lda_beta2, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.cap="Log2 ratio of beta topic 3 (Mbeki) / topic 4 (Ramaphosa)", fig.width = 10}
 
@@ -1433,11 +1438,11 @@ beta_wide2 %>%
 
 ```
 
-A comparison of the words with greatest differences between **Mbeki** and **Ramaphosa** in @fig-lda_beta2 reveal how they dealt with very different agendas during their respective tenures.
-
 Mbeki presided over the hosting of the 2010 FIFA World Cup (`soccer`, `cup`) whilst Ramaphosa had to deal with a global pandemic in 2020-2021 (`covid`, `pandemic`, `restore`) as well as the Eskom electricity crisis which had started already during Mbeki's presidency (`shed`, `SOEs`, `restore`).
 
 On a side note, Mbeki appeared to be very fond of the phrase `"discharge their responsibilities"` which is why the word `discharge` stands out in the comparison.
+
+A comparison of the words with greatest differences between **Ramaphosa** and **Zuma** in @fig-lda_beta3 reveal differences in their presidential styles.
 
 ```{r fig-lda_beta3, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta topic 4 (Ramaphosa) / topic 5 (Zuma)", fig.width = 10}
 
@@ -1454,8 +1459,6 @@ beta_wide3 %>%
   coord_flip()
 
 ```
-
-A comparison of the words with greatest differences between **Ramaphosa** and **Zuma** in @fig-lda_beta3 reveal differences in their presidential styles.
 
 Terms like `friend` and `compatriot` by Zuma's indicate his reliance on left-wing populist rhetoric in his speeches [@enwiki:1179287469], whilst the use of terms like `SOEs` and `capture` by Ramaphosa suggest that Zuma did not to any similar degree confront the issues of corruption and inefficiencies in state-owned-enterprises (including Eskom) that beset the legacy of his presidency (and which formed the basis of Ramaphosa's subsequent challenges).
 
@@ -1518,6 +1521,7 @@ ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9) %>%
 
 ```
 
+The section of topic modelling is ended with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023** in @fig-lda_beta6.
 
 ```{r fig-lda_beta6, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta in 2019 post-election speech / 2023 speech", fig.width = 10}
 
@@ -1541,7 +1545,6 @@ ramaphosa_beta_wide %>%
 
 ```
 
-The section of topic modelling is ended with a look at the greatest word differences between Ramaphosa's **2019 post-election speech**, and the one he delivered in **2023** in @fig-lda_beta6.
 
 Terms in 2019 included `dream`, `comfort`, `bold` and `NDP` (the *National Development Plan*, initiated in 2013, which aims to eliminate poverty and reduce inequality by 2030).
 
@@ -1557,9 +1560,9 @@ The analysis of presidential speeches presented several important findings. It b
 These speeches reflect a consistent aspiration to inspire hope, confidence, and forward-looking optimism.
 Additionally, the topics covered in these speeches closely align with the current state of affairs and the goals the leaders intend to achieve. Each president's agenda is reflected in the themes they address, providing insight into the atmosphere of their era and the priorities they emphasize.
 
-The application of topic modeling proved to be a powerful analytical tool for summarizing extensive bodies of text. It facilitated the clustering of content into logical topics, revealing distinctive styles and agendas across different presidencies. This method was particularly illuminating in uncovering the changing priorities and evolving objectives of each president throughout their tenures.
-Moreover, the comparison of an individual president's speeches under topic modeling demonstrated dynamic changes and progressions over time. This dynamic nature suggests that a president's topic summaries can undergo significant alterations from one year to the next, reflecting the shifting landscape and challenges they address.
+The application of topic modelling proved to be a powerful analytical tool for summarizing extensive bodies of text. It facilitated the clustering of content into logical topics, revealing distinctive styles and agendas across different presidencies. This method was particularly illuminating in uncovering the changing priorities and evolving objectives of each president throughout their tenures.
+Moreover, the comparison of an individual president's speeches under topic modelling demonstrated dynamic changes and progressions over time. This dynamic nature suggests that a president's topic summaries can undergo significant alterations from one year to the next, reflecting the shifting landscape and challenges they address.
 
-In conclusion, the combined use of topic modeling and sentiment analysis offers a robust framework for dissecting presidential speeches and understanding the intricate dynamics of leadership and public communication. The potential for this approach to yield fresh insights and enhance our understanding of political discourse remains a promising avenue for future research.
+In conclusion, the combined use of topic modelling and sentiment analysis offers a robust framework for dissecting presidential speeches and understanding the intricate dynamics of leadership and public communication. The potential for this approach to yield fresh insights and enhance our understanding of political discourse remains a promising avenue for future research.
 
 # References
