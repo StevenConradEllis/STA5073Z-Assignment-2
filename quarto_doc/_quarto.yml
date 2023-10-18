@@ -11,7 +11,7 @@ website:
       - href: assignment2.qmd
         text: Assignment Submission
       - href: llm.qmd
-        text: "Review: Using ChatGPT as a Large Language Model"
+        text: "Using ChatGPT as an LLM"
 
 format:
   html:
