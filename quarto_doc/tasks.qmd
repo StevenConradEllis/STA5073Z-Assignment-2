@@ -1,0 +1,26 @@
+---
+title: "Tasks performed"
+---
+
+The group members performed the following tasks during the creation and compilation of this assignment:
+
+### Ropafadzo Chimuti
+* NRC sentiment analysis
+* LLM analysis and review
+* Creation of the following copy
+	+ Introduction
+	+ Conclusion
+
+### Tanweer Nujjoo
+* Bing sentiment analysis
+* Analysis of top 20 words, bigrams and trigrams
+* Creation of the following copy
+	+ Materials and Methods
+	+ Sentiment analysis results
+
+### Steven Ellis
+* Topic modelling
+* Creation of the following copy
+	+ Abstract
+	+ Materials and Methods
+	+ Topic modelling analysis results
