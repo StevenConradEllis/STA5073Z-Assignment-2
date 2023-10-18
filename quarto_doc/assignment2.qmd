@@ -1305,15 +1305,16 @@ In @fig-R, we observe the evolution of emotional dynamics over time. Notably, th
 
 ## Topic Modelling
 
-```{r lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+```{r fig-lda_graph1, message=FALSE, warning=FALSE, results='hide', echo=FALSE,fig.align='center', fig.cap="Top terms per LDA-generated topic - all presidential speeches", fig.width = 10, fig.height = 7}
 
 # Visualize top terms per topic using ggplot
 sona_top_terms %>%
   mutate(term = reorder_within(term, beta, topic)) %>%
   ggplot(aes(beta, term, fill = factor(topic))) +
+  xlab("Beta")+
+  ylab("Term")+
   geom_col(show.legend = FALSE) +
   facet_wrap(~ topic, scales = "free") +
-  labs(title = "Figure 1 : Top terms per LDA-generated topic - All Presidential Speeches") +
   scale_y_reordered()
 
 ```
@@ -1364,7 +1365,7 @@ kable(sona_topic_summary)
 
 The comparison of the log ratio of beta values of different president topics revealed interesting insights into the eras characterizing their tenures, their priorities and the challenges each faced.
 
-```{r lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+```{r fig-lda_beta1, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta in topic 2 (Mandela) / topic 1 (deKlerk)", fig.width = 10}
 
 # beta comparison of topic 1 and topic 2
 beta_wide <- sona_topics %>%
@@ -1398,7 +1399,7 @@ beta_wide %>%
   ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(title = 'Figure 2: Log2 ratio of beta in topic 2 (Mandela) / topic 1 (deKlerk)', y = 'Log ratio difference', x = 'Term') +
+  labs(y = 'Log Ratio Difference', x = 'Term') +
   coord_flip()
 
 ```
@@ -1409,7 +1410,7 @@ deKlerk made a single speech just before the 1994 democratic elections, expressi
 
 The log ratios between both presidents' topic beta's is very low compared to other subsequent beta comparisons, however, suggesting much commonality in the topics they spoke about and perhaps also their writing styles.
 
-```{r lda_beta2, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+```{r fig-lda_beta2, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.cap="Log2 ratio of beta topic 3 (Mbeki) / topic 4 (Ramaphosa)", fig.width = 10}
 
 # Visualize the second beta
 beta_wide2 %>%
@@ -1420,7 +1421,7 @@ beta_wide2 %>%
   ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(title = 'Figure 3: Log2 ratio of beta topic 3 (Mbeki) / topic 4 (Ramaphosa', y = 'Log ratio difference', x = 'Term') +
+  labs(y = 'Log Ratio Difference', x = 'Term') +
   coord_flip()
 
 ```
@@ -1431,7 +1432,7 @@ Mbeki presided over the hosting of the 2010 FIFA World Cup (`soccer`, `cup`) whi
 
 On a side note, Mbeki appeared to be very fond of the phrase `"discharge their responsibilities"` which is why the word `discharge` stands out in the comparison.
 
-```{r lda_beta3, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+```{r fig-lda_beta3, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta topic 4 (Ramaphosa) / topic 5 (Zuma)", fig.width = 10}
 
 # Visualize the third beta
 beta_wide3 %>%
@@ -1442,7 +1443,7 @@ beta_wide3 %>%
   ggplot(aes(term, log_ratio, fill = "#478ACA")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(title = 'Figure 4: Log2 ratio of beta topic 4 (Ramaphosa) / topic 5 (Zuma', y = 'Log ratio difference', x = 'Term') +
+  labs(y = 'Log Ratio Difference', x = 'Term') +
   coord_flip()
 
 ```
@@ -1510,16 +1511,8 @@ ramaphosa_sona_documents <- ramaphosa_sona_documents %>% filter(gamma > 0.9) %>%
 
 ```
 
-```{r ram.prob, echo=FALSE}
-#| label: tbl-ram-probs
-#| tbl-cap: "Ramaphosa-Per-Topic Probabilities"
-#| tbl-colwidths: [60,20,20]
 
-# display the president per-topic probabilities
-# kable(ramaphosa_sona_documents)
-```
-
-```{r lda_beta6, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+```{r fig-lda_beta6, message=FALSE, warning=FALSE, results='hide', echo=FALSE, fig.align='center', fig.cap="Log2 ratio of beta in 2019 post-election speech / 2023 speech", fig.width = 10}
 
 ramaphosa_beta_wide <- ramaphosa_sona_topics %>%
   mutate(topic = paste0("topic", topic)) %>%
@@ -1536,7 +1529,7 @@ ramaphosa_beta_wide %>%
   ggplot(aes(term, log_ratio, fill = "#478aca")) +
   theme(legend.position = "none") +
   geom_col() +
-  labs(title = 'Figure 5: Log2 ratio of beta in 2019 post-election speech / 2023 speech', y = 'Log ratio difference', x = 'Term') +
+  labs(y = 'Log Ratio Difference', x = 'Term') +
   coord_flip()
 
 ```
