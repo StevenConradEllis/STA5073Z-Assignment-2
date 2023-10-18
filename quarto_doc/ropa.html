@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.433">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="author" content="Ropafadzo Chimuti">
+<meta name="author" content="Tanweer Nujjoo">
+<meta name="author" content="Steven Ellis">
+<meta name="keywords" content="SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words">
+
+<title>A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1994 to 2023</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+</style>
+
+
+<script src="ropa_files/libs/clipboard/clipboard.min.js"></script>
+<script src="ropa_files/libs/quarto-html/quarto.js"></script>
+<script src="ropa_files/libs/quarto-html/popper.min.js"></script>
+<script src="ropa_files/libs/quarto-html/tippy.umd.min.js"></script>
+<script src="ropa_files/libs/quarto-html/anchor.min.js"></script>
+<link href="ropa_files/libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="ropa_files/libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="ropa_files/libs/bootstrap/bootstrap.min.js"></script>
+<link href="ropa_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="ropa_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+
+
+</head>
+
+<body class="fullcontent">
+
+<div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
+
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1994 to 2023</h1>
+</div>
+
+
+
+<div class="quarto-title-meta">
+
+    <div>
+    <div class="quarto-title-meta-heading">Authors</div>
+    <div class="quarto-title-meta-contents">
+             <p>Ropafadzo Chimuti </p>
+             <p>Tanweer Nujjoo </p>
+             <p>Steven Ellis </p>
+          </div>
+  </div>
+    
+  
+    
+  </div>
+  
+<div>
+  <div class="abstract">
+    <div class="abstract-title">Abstract</div>
+    <p>Summary of motivation and outcome. Start with context, task and object, finish with findings and conclusion. This is written last.</p>
+  </div>
+</div>
+
+</header>
+
+<section id="introduction" class="level2">
+<h2 class="anchored" data-anchor-id="introduction">Introduction</h2>
+<p>The State of the Nation Address (SONA) is a crucial annual event in the political landscape of South Africa. It serves as a comprehensive summary of the nation’s current status and a roadmap for its future. The address, delivered by the country’s highest-ranking official, outlines achievements, priorities, and strategies for the upcoming year, significantly influencing policy, legislation, and public discourse.</p>
+<p>This research paper, undertakes a comprehensive descriptive examination of the content within South African State of the Nation Addresses (SONAs), employing advanced techniques in sentiment analysis and topic modeling. Sentiment analysis allows for the extraction and quantification of emotional and attitudinal tones within the speeches, providing deeper insights into the language used by leaders to engage, motivate, and influence their audience. Understanding prevailing sentiments also offers valuable context for assessing the reception and impact of the SONA.</p>
+<p>Furthermore, topic modeling enables the categorization of the diverse subjects addressed within these speeches. This approach clarifies the key areas of government focus and the shifting priorities as they evolve over time. It not only aids in identifying primary trends but also provides a quantitative basis for comparisons between different presidencies.</p>
+<p>A comprehensive explanation of sentiment analysis and topic modeling, including a breakdown of their methodologies and an examination of the results as applied to the analysis of South African SONAs are presented in relevant sections within this report.</p>
+<section id="brief-overview-of-the-dataset" class="level3">
+<h3 class="anchored" data-anchor-id="brief-overview-of-the-dataset"><strong>Brief overview of the dataset</strong></h3>
+<p>The dataset used in this study comprised of speeches obtained from various text files, each of differing sizes. These speeches were presented in a semi-formal structure, with a common characteristic being the inclusion of the date of delivery at the beginning. Additionally, it is expected that the data may include regular expressions, given that the data consists of raw speeches from the presidents.</p>
+<p>The data is not inherently structured in a manner conducive to automated tabulation and analysis. Therefore, preprocessing steps were necessary to facilitate subsequent analysis. Detailed information regarding the preprocessing procedures is provided in the following section.</p>
+</section>
+<section id="data-pre-processing-and-cleaning" class="level3">
+<h3 class="anchored" data-anchor-id="data-pre-processing-and-cleaning">Data pre-processing and cleaning</h3>
+</section>
+<section id="overall-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="overall-analysis">Overall Analysis</h3>
+</section>
+</section>
+<section id="sentiment" class="level2">
+<h2 class="anchored" data-anchor-id="sentiment">Sentiment</h2>
+<p>Summary of data-set and data cleaning methods used. How the data was read in, parsed.</p>
+<section id="sentiment-analysis" class="level3">
+<h3 class="anchored" data-anchor-id="sentiment-analysis">Sentiment Analysis</h3>
+<p>Summary of tools used for sentiment analysis (R packages), how data was pre-processed for sentiment analysis, and techniques used.</p>
+<p><strong>Bing lexicon</strong></p>
+<p><strong>Nrc lexicon</strong></p>
+<p>This report also employs the NRC Emotion Lexicon for sentimental analysis, a resource that associates English words with eight fundamental emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust), along with two sentiments (negative and positive). This lexicon was used to analyse the emotions expressed in presidential speeches, providing insights into the emotional aspects of their leadership and communication.</p>
+</section>
+<section id="score-of-emotions-expressed-by-all-presidents" class="level3">
+<h3 class="anchored" data-anchor-id="score-of-emotions-expressed-by-all-presidents">Score of Emotions Expressed by all Presidents</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ropa_files/figure-html/ovarall_nrc-1.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption class="figure-caption">Emotion Sentiment Scores Expressed by All Presidents</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The emotions expressed by leaders are often influenced by their communication goals, the specific context of their speeches, and their personal leadership style. The top three emotions expressed by all presidents, as shown by figure 1, are trust, anticipation and joy. This is expected as leaders often aim to inspire confidence and trust in their followers. Expressing trust can help leaders gain the support and loyalty of their constituents. Leaders also use anticipation to create a sense of excitement, hope, and forward-looking optimism. This emotion can motivate people to support a leader’s vision or initiatives. Joy is usually expressed as leaders celebrate achievements, milestones they have accomplished.</p>
+</section>
+<section id="emotion-scores-expressed-by-individual-presidents" class="level3">
+<h3 class="anchored" data-anchor-id="emotion-scores-expressed-by-individual-presidents">Emotion Scores Expressed By Individual Presidents</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ropa_files/figure-html/ind_nrc-1.png" class="img-fluid figure-img" width="672"></p>
+<figcaption class="figure-caption">Emotion Sentiment Scores Expressed by Each Presidents</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>The emotional scores of each of the six presidents closely mirror the patterns shown in Figure 1. This suggests that the speeches of all presidents generally convey similar emotions. The distinctions become evident in two instances, when the lower sections of the charts are examined, where the least frequently expressed emotions lie and between the chart for president deKlerk and all the other presidents. President Mandela and President Mbeki display a higher count of “disgust” compared to “surprise” in their speeches, whereas the other presidents express more “surprise” than “disgust.” This variation can be attributed to the historical context of their respective presidencies. President Mandela and President Mbeki served shortly after the end of apartheid, a period marked by addressing morally reprehensible actions and situations. Consequently, their speeches may have conveyed a greater sense of “disgust” when addressing such issues, reflecting a strong stance against unethical behaviour. President de Klerk expressed a heightened level of fear in comparison to the other presidents, and this can be linked to the unique historical context of his presidency as well. It is noteworthy that President de Klerk’s tenure coincided with the final stages of apartheid in South Africa.</p>
+</section>
+<section id="emotions-expressed-over-time" class="level3">
+<h3 class="anchored" data-anchor-id="emotions-expressed-over-time">Emotions Expressed Over-time</h3>
+<div class="cell">
+<div class="cell-output-display">
+<div class="quarto-figure quarto-figure-center">
+<figure class="figure">
+<p><img src="ropa_files/figure-html/nrc_overtime-1.png" class="img-fluid figure-img" style="width:80.0%"></p>
+<figcaption class="figure-caption">Evolution of emotions expressed over time from 1994-2023 by all presidents</figcaption>
+</figure>
+</div>
+</div>
+</div>
+<p>In Figure 3, we observe the evolution of emotional dynamics over time. Notably, there is a distinct upswing in the expression of positive emotions, particularly from 2009 when President Zuma assumed office. This trend potentially signifies President Zuma’s leadership style, which may have prioritized positivity, unity, and motivation. Alternatively, it could imply that his speeches served as a means of crisis management, offering reassurance to the public and reinforcing the notion of stability and control during challenging times. We can observe a significant increase in negative emotions during the time frame spanning 2021 to 2023, marked notably by heightened expressions of fear and sadness. This trend can be traced back to the profound global impact of the novel coronavirus, which affected nations worldwide in 2020.</p>
+</section>
+</section>
+<section id="review-using-chatgpt-as-a-large-language-model" class="level2">
+<h2 class="anchored" data-anchor-id="review-using-chatgpt-as-a-large-language-model"><strong>Review: Using ChatGPT as a Large Language Model</strong></h2>
+<p>Large Language Models (LLMs) are sophisticated artificial intelligence tools that assist with numerous tasks, such as compiling, processing, and writing reports, such as this one. ChatGPT, in particular, has shown remarkable capabilities in assisting with such tasks, and so it was used to assist with completing this task and the following is a detailed review of the experience.</p>
+<section id="prompting-for-writing" class="level4">
+<h4 class="anchored" data-anchor-id="prompting-for-writing"><strong>Prompting for Writing:</strong></h4>
+<p>When it came to the writing process, ChatGPT excelled when it was provided with detailed descriptions of what was required, often in concise bullet points. This structured approach allowed ChatGPT to address each point systematically. While it usually produced well-structured and coherent content, minor human adjustments were occasionally necessary for optimal results.</p>
+<p>Its performance deteriorated when clear and detailed instructions were not provided. In such cases, the results were less satisfactory, very generalized and often necessitated additional prompting or fine-tuning.</p>
+</section>
+<section id="prompting-for-coding" class="level4">
+<h4 class="anchored" data-anchor-id="prompting-for-coding"><strong>Prompting for Coding:</strong></h4>
+<p>In the realm of coding, ChatGPT proved to be a valuable resource for understanding and debugging errors. When presented with coding errors, it demonstrated an impressive accuracy rate of identifying the root cause of the issue.</p>
+<p>Furthermore, for simpler or common coding exercises, ChatGPT typically provided effective solutions on the first attempt. However, it’s with more complex coding problems, even when prompts were tuned, ChatGPT struggled to produce correct answers. This is perhaps indicative of the limitations of current AI models in handling intricate coding challenges.</p>
+</section>
+<section id="prompting-for-facts-and-definitions" class="level4">
+<h4 class="anchored" data-anchor-id="prompting-for-facts-and-definitions"><strong>Prompting for Facts and Definitions:</strong></h4>
+<p>ChatGPT delivered accurate facts and definitions when prompted. However, due diligence remained essential, as the information provided was cross-checking for precision.</p>
+<p>One remarkable aspect of ChatGPT was its ability to explain topics comprehensively, providing definitions that allowed for a solid understanding of the subject matter. It excelled in generating examples and rephrasing information in simpler terms, which greatly aided in achieving a clear and thorough comprehension of the topics it addressed.</p>
+<p>In summary, ChatGPT has proven to be a valuable tool for a variety of tasks, particularly in the realm of report compilation, coding assistance, and knowledge provision. While it excels with well-defined and detailed prompts, its limitations become apparent when instructions are less clear or when confronted with intricate coding challenges. Nevertheless, ChatGPT’s capabilities in simplifying complex concepts and generating good quality written content offer significant value in a variety of applications.</p>
+</section>
+</section>
+<section id="references" class="level2">
+<h2 class="anchored" data-anchor-id="references">References</h2>
+</section>
+
+</main>
+<!-- /main column -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+</div> <!-- /content -->
+
+
+
+</body></html>

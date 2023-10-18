@@ -1,0 +1,381 @@
+---
+author:
+  - name: Ropafadzo Chimuti
+    email: CHMROP002@myuct.ac.za
+  - name: Tanweer Nujjoo
+    email: NJJSYE001@myuct.ac.za
+  - name: Steven Ellis
+    email: ELLSTE005@uct.ac.za
+        
+title: A Descriptive Analysis of Presidential SONA Addresses in South Africa - 1994 to 2023
+keywords: SONA, text modelling, sentiment analysis, latent Dirichlet allocation, LDA, bag-of-words
+abstract: |
+  Summary of motivation and outcome. Start with context, task and object, finish with findings and conclusion. This is written last.
+---
+
+```{r libraries, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+library(stringr)
+library(tidyverse)
+library(tidytext)
+library(textstem)
+library(textdata)
+library(tm)
+library(MASS)
+library(topicmodels)
+library(knitr)
+```
+
+```{r extract, message=FALSE, warning=FALSE, results='hide', echo=FALSE}
+set.seed(2023)
+
+
+# read in text data files and organise these into a data frame
+filenames <- c('1994_post_elections_Mandela.txt', 
+               '1994_pre_elections_deKlerk.txt', 
+               '1995_Mandela.txt', 
+               '1996_Mandela.txt', 
+               '1997_Mandela.txt',
+               '1998_Mandela.txt', 
+               '1999_post_elections_Mandela.txt', 
+               '1999_pre_elections_Mandela.txt', 
+               '2000_Mbeki.txt', 
+               '2001_Mbeki.txt', 
+               '2002_Mbeki.txt', 
+               '2003_Mbeki.txt', 
+               '2004_post_elections_Mbeki.txt', 
+               '2004_pre_elections_Mbeki.txt', 
+               '2005_Mbeki.txt', 
+               '2006_Mbeki.txt', 
+               '2007_Mbeki.txt', 
+               '2008_Mbeki.txt', 
+               '2009_post_elections_Zuma.txt', 
+               '2009_pre_elections_ Motlanthe.txt', 
+               '2010_Zuma.txt', 
+               '2011_Zuma.txt', 
+               '2012_Zuma.txt', 
+               '2013_Zuma.txt', 
+               '2014_post_elections_Zuma.txt', 
+               '2014_pre_elections_Zuma.txt', 
+               '2015_Zuma.txt', 
+               '2016_Zuma.txt', 
+               '2017_Zuma.txt', 
+               '2018_Ramaphosa.txt', 
+               '2019_post_elections_Ramaphosa.txt', 
+               '2019_pre_elections_Ramaphosa.txt', 
+               '2020_Ramaphosa.txt', 
+               '2021_Ramaphosa.txt', 
+               '2022_Ramaphosa.txt', 
+               '2023_Ramaphosa.txt')
+
+
+this_speech <- c()
+this_speech[1] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1994_post_elections_Mandela.txt', nchars = 27050)
+this_speech[2] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1994_pre_elections_deKlerk.txt', nchars = 12786)
+this_speech[3] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1995_Mandela.txt', nchars = 39019)
+this_speech[4] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1996_Mandela.txt', nchars = 39524)
+this_speech[5] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1997_Mandela.txt', nchars = 37489)
+this_speech[6] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1998_Mandela.txt', nchars = 45247)
+this_speech[7] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1999_post_elections_Mandela.txt', nchars = 34674)
+this_speech[8] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/1999_pre_elections_Mandela.txt', nchars = 41225)
+this_speech[9] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2000_Mbeki.txt', nchars = 37552)
+this_speech[10] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2001_Mbeki.txt', nchars = 41719)
+this_speech[11] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2002_Mbeki.txt', nchars = 50544)
+this_speech[12] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2003_Mbeki.txt', nchars = 58284)
+this_speech[13] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2004_post_elections_Mbeki.txt', nchars = 34590)
+this_speech[14] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2004_pre_elections_Mbeki.txt', nchars = 39232)
+this_speech[15] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2005_Mbeki.txt', nchars = 54635)
+this_speech[16] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2006_Mbeki.txt', nchars = 48643)
+this_speech[17] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2007_Mbeki.txt', nchars = 48641)
+this_speech[18] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2008_Mbeki.txt', nchars = 44907)
+this_speech[19] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2009_post_elections_Zuma.txt', nchars = 31101)
+this_speech[20] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2009_pre_elections_Motlanthe.txt', nchars = 47157)
+this_speech[21] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2010_Zuma.txt', nchars = 26384)
+this_speech[22] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2011_Zuma.txt', nchars = 33281)
+this_speech[23] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2012_Zuma.txt', nchars = 33376)
+this_speech[24] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2013_Zuma.txt', nchars = 36006)
+this_speech[25] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2014_post_elections_Zuma.txt', nchars = 29403)
+this_speech[26] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2014_pre_elections_Zuma.txt', nchars = 36233)
+this_speech[27] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2015_Zuma.txt', nchars = 32860)
+this_speech[28] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2016_Zuma.txt', nchars = 32464)
+this_speech[29] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2017_Zuma.txt', nchars = 35981)
+this_speech[30] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2018_Ramaphosa.txt', nchars = 33290)
+this_speech[31] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2019_post_elections_Ramaphosa.txt', nchars = 42112)
+this_speech[32] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2019_pre_elections_Ramaphosa.txt', nchars = 56960)
+this_speech[33] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2020_Ramaphosa.txt', nchars = 47910)
+this_speech[34] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2021_Ramaphosa.txt', nchars = 43352)
+this_speech[35] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2022_Ramaphosa.txt', nchars = 52972)
+this_speech[36] <- readChar('https://raw.githubusercontent.com/iandurbach/datasci-fi/master/data/sona/2022_Ramaphosa.txt', nchars = 53933)
+
+
+sona <- data.frame(filename = filenames, speech = this_speech, stringsAsFactors = FALSE)
+# extract year and president for each speech
+sona$year <- str_sub(sona$filename, start = 1, end = 4)
+sona$pres <- str_remove_all(str_extract(sona$filename, "[dA-Z].*\\."), "\\.")
+
+# clean the sona dataset by adding the date and removing unnecessary text
+replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;|\n'
+
+sona <-sona %>%
+  mutate(speech = lemmatize_strings(stringr::str_replace_all(speech, replace_reg , ' '))
+         ,date = str_sub(speech, start=1, end=30)
+         ,date = str_replace_all(date, "February", "02")
+         ,date = str_replace_all(date, "June", "06")
+         ,date = str_replace_all(date, "Feb", "02")
+         ,date = str_replace_all(date, "May", "05")
+         ,date = str_replace_all(date, "Jun", "06")
+         ,date = str_replace_all(date, "Thursday, ","")
+         ,date = str_replace_all(date, ' ', '-')        
+         ,date = str_replace_all(date, "[A-z]",'')
+         ,date = str_replace_all(date, '-----', '')
+         ,date = str_replace_all(date, '----', '')
+         ,date = str_replace_all(date, '---', '')
+         ,date = str_replace_all(date, '--', '')
+  )
+
+# Convert to tibble
+sona <- as.tibble(sona)
+
+replace_reg <- '(http.*?(\\s|.$))|(www.*?(\\s|.$))|&amp;|&lt;|&gt;'
+unnest_reg <- "[^\\w_#@'’]"
+
+# tidy text 
+tidy_sona <- sona %>% 
+  mutate(speech = str_replace_all(speech, replace_reg, '')) %>% # remove links etx
+  unnest_tokens(word, speech, token = 'regex', pattern = unnest_reg) %>%   # tokenize
+  filter(!word %in% stop_words$word, str_detect(word, '[A-Za-z]')) %>%  # remove stop words
+  dplyr::select(word, pres, date, filename,year)  # select variables needed
+
+# Count the number of times each word in our vocabulary was used by each president, 
+# creating a "long" (and tidy) format of the document-term matrix.
+sona_tdf <- tidy_sona %>%
+  group_by(pres,year,word,date) %>%
+  count() %>%  
+  ungroup()
+
+# Remove common SONA words that are used very regularly, but which don't convey too much meaning
+common_sona_reg <- 'speaker|madame|honourable|chairperson|development|national|ensure|deputy|africa|african|africans|south|southern|government|people|programme|economic|economy|country'
+sona_tdf <- sona_tdf %>% filter(!grepl(common_sona_reg, word))
+
+```
+
+## Introduction
+
+The State of the Nation Address (SONA) is a crucial annual event in the political landscape of South Africa. It serves as a comprehensive summary of the nation's current status and a roadmap for its future. The address, delivered by the country's highest-ranking official, outlines achievements, priorities, and strategies for the upcoming year, significantly influencing policy, legislation, and public discourse.
+
+This research paper, undertakes a comprehensive descriptive examination of the content within South African State of the Nation Addresses (SONAs), employing advanced techniques in sentiment analysis and topic modeling. Sentiment analysis allows for the extraction and quantification of emotional and attitudinal tones within the speeches, providing deeper insights into the language used by leaders to engage, motivate, and influence their audience. Understanding prevailing sentiments also offers valuable context for assessing the reception and impact of the SONA.
+
+Furthermore, topic modeling enables the categorization of the diverse subjects addressed within these speeches. This approach clarifies the key areas of government focus and the shifting priorities as they evolve over time. It not only aids in identifying primary trends but also provides a quantitative basis for comparisons between different presidencies.
+
+A comprehensive explanation of sentiment analysis and topic modeling, including a breakdown of their methodologies and an examination of the results as applied to the analysis of South African SONAs are presented in relevant sections within this report.
+
+### **Brief overview of the dataset**
+
+The dataset used in this study comprised of speeches obtained from various text files, each of differing sizes. These speeches were presented in a semi-formal structure, with a common characteristic being the inclusion of the date of delivery at the beginning. Additionally, it is expected that the data may include regular expressions, given that the data consists of raw speeches from the presidents.
+
+The data is not inherently structured in a manner conducive to automated tabulation and analysis. Therefore, preprocessing steps were necessary to facilitate subsequent analysis. Detailed information regarding the preprocessing procedures is provided in the following section.
+
+### Data pre-processing and cleaning
+
+### Overall Analysis
+
+## Sentiment
+
+Summary of data-set and data cleaning methods used. How the data was read in, parsed.
+
+### Sentiment Analysis
+
+Summary of tools used for sentiment analysis (R packages), how data was pre-processed for sentiment analysis, and techniques used.
+
+**Bing lexicon**
+
+**Nrc lexicon**
+
+This report also employs the NRC Emotion Lexicon for sentimental analysis, a resource that associates English words with eight fundamental emotions (anger, fear, anticipation, trust, surprise, sadness, joy, and disgust), along with two sentiments (negative and positive). This lexicon was used to analyse the emotions expressed in presidential speeches, providing insights into the emotional aspects of their leadership and communication.
+
+### Score of Emotions Expressed by all Presidents
+
+```{r ovarall_nrc, echo=FALSE, eval=TRUE, out.width="80%", warning=FALSE, fig.cap="Emotion Sentiment Scores Expressed by All Presidents"}
+
+#separate president speeches
+mandela_speeches <- sona_tdf %>% filter(pres == "Mandela")
+mbeki_speeches <- sona_tdf %>% filter(pres == "Mbeki")
+zuma_speeches <- sona_tdf %>% filter(pres == "Zuma")
+ramaphosa_speeches <- sona_tdf %>% filter(pres == "Ramaphosa")
+deklerk_speeches <- sona_tdf %>% filter(pres == "deKlerk" )
+motlanthe_speeches <- sona_tdf %>% filter(pres == "Motlanthe" )
+
+# nrc sentiment analysis
+#load the nrc dictionary 
+nrc <- get_sentiments('nrc') 
+save(nrc, file = "dsfi-lexicons.Rdata")
+
+#overall sentiments by all presidents
+sona_tdf_nrc <- sona_tdf %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by All Presidents") +
+  theme(plot.title = element_text(size = 11,hjust = 0.5), legend.position = '')+
+  scale_fill_gradient(low = "springgreen", high = "darkseagreen1")
+sona_tdf_nrc
+```
+
+The emotions expressed by leaders are often influenced by their communication goals, the specific context of their speeches, and their personal leadership style. The top three emotions expressed by all presidents, as shown by figure 1, are trust, anticipation and joy. This is expected as leaders often aim to inspire confidence and trust in their followers. Expressing trust can help leaders gain the support and loyalty of their constituents. Leaders also use anticipation to create a sense of excitement, hope, and forward-looking optimism. This emotion can motivate people to support a leader's vision or initiatives. Joy is usually expressed as leaders celebrate achievements, milestones they have accomplished.
+
+### Emotion Scores Expressed By Individual Presidents
+
+```{r ind_nrc,echo=FALSE, eval=TRUE,fig.cap="Emotion Sentiment Scores Expressed by Each Presidents", warning=FALSE}
+#nrc sentiments by individual presidents  
+mandela_nrc <- mandela_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral") %>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by Mandela") +
+  theme(plot.title = element_text(size = 8), legend.position = '')+
+  scale_fill_gradient(low = "deeppink3", high = "pink")
+
+
+mbeki_nrc <- mbeki_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+ xlab("") +
+  ggtitle("Emotion Sentiment Scores Expressed by Mbeki") +
+  theme(plot.title = element_text(size = 8), legend.position = '')
+
+ramaphosa_nrc <- ramaphosa_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by Ramaphosa") +
+  theme(plot.title = element_text(size = 8), legend.position = '')+
+  scale_fill_gradient(low = "darkgreen", high = "darkseagreen1")
+
+
+zuma_nrc <- zuma_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by Zuma") +
+  theme(plot.title = element_text(size = 8), legend.position = '')+
+  scale_fill_gradient(low = "magenta4", high = "plum")
+
+deklerk_nrc <- deklerk_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by deKlerk") +
+  theme(plot.title = element_text(size = 8), legend.position = '')+
+  scale_fill_gradient(low = "chocolate", high = "burlywood1")
+
+motlanthe_nrc <- motlanthe_speeches %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  count(sentiment) %>%
+  arrange(desc(n)) %>%
+  filter(rank(desc(n)) <= 20) %>%
+  ggplot(aes(reorder(sentiment,n),n,fill= -n)) + geom_col() + coord_flip() + ylab("Count")+xlab("")+
+  ggtitle("Emotion Sentiment Scores Expressed by Motlanthe") +
+  theme(plot.title = element_text(size = 8), legend.position = '')+
+  scale_fill_gradient(low = "darkcyan", high = "paleturquoise")
+
+# combining above plots in one figure
+cowplot::plot_grid(mandela_nrc,deklerk_nrc,
+                   mbeki_nrc,zuma_nrc,
+                   motlanthe_nrc,ramaphosa_nrc,
+                   nrow = 3, ncol = 2, labels = "AUTO", label_size = 9, label_x = 0)
+
+```
+
+The emotional scores of each of the six presidents closely mirror the patterns shown in Figure 1. This suggests that the speeches of all presidents generally convey similar emotions. The distinctions become evident in two instances, when the lower sections of the charts are examined, where the least frequently expressed emotions lie and between the chart for president deKlerk and all the other presidents. President Mandela and President Mbeki display a higher count of "disgust" compared to "surprise" in their speeches, whereas the other presidents express more "surprise" than "disgust." This variation can be attributed to the historical context of their respective presidencies. President Mandela and President Mbeki served shortly after the end of apartheid, a period marked by addressing morally reprehensible actions and situations. Consequently, their speeches may have conveyed a greater sense of "disgust" when addressing such issues, reflecting a strong stance against unethical behaviour. President de Klerk expressed a heightened level of fear in comparison to the other presidents, and this can be linked to the unique historical context of his presidency as well. It is noteworthy that President de Klerk's tenure coincided with the final stages of apartheid in South Africa.
+
+### Emotions Expressed Over-time
+
+```{r nrc_overtime, echo=FALSE, eval=TRUE,warning=FALSE, out.width="80%",message=FALSE,fig.cap="Evolution of emotions expressed over time from 1994-2023 by all presidents"}
+# removing deKlerk and Motlanthe from the analysis as they made only 1 speech
+sona_tdf  <- sona_tdf  %>%
+  filter(!pres %in% c('deKlerk', 'Motlanthe')) # excluding 1 time president
+
+#nrc over time 
+emotion_change_over_time <- sona_tdf %>%
+  left_join(nrc, by = "word") %>%
+  mutate(sentiment = ifelse(is.na(sentiment), 'neutral', sentiment)) %>%
+  filter(sentiment != "neutral")%>%
+  group_by(sentiment,year) %>%
+  summarize(n = n()) 
+
+emotion_change_over_time <-emotion_change_over_time%>%
+  left_join(emotion_change_over_time %>% 
+              group_by(year) %>% 
+              summarise(total = sum(n))) %>%
+  mutate(freq = n/total)
+
+emotion_change_over_time %>%
+  ggplot(aes(x = year, y = freq, colour = sentiment,group=sentiment)) +
+  geom_line() +
+  geom_smooth(aes(colour = sentiment)) + ylab("frequency") + xlab("year")+
+  ggtitle("Emotion Change Over Time") +
+  theme(plot.title = element_text(size = 11))+ 
+  theme(axis.text.x = element_text(angle = 90, hjust = 1)) +
+  geom_rect(aes(xmin = 1 , xmax = 6 , ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "deeppink3", size = .05 , linetype = '8f') + ggplot2::annotate(geom="text", x=1+.5, y=0.31, label="Mandela",color="deeppink3", size = 3) +
+  geom_rect(aes(xmin = 7 , xmax = 15 , ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "steelblue", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=7+.5, y=0.31, label="Mbeki",color="steelblue", size = 3) +
+  geom_rect(aes(xmin = 16, xmax = 24, ymin = 0, ymax = 0.3),
+            fill = "transparent", color = "magenta4", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=16+.5, y=0.31, label="Zuma",color="magenta4", size = 3) +
+  geom_rect(aes(xmin = 25, xmax = 30, ymin = 0, ymax =0.3),
+            fill = "transparent", color = "darkgreen", size = .05, linetype = '8f') + ggplot2::annotate(geom="text", x=25+.8, y=0.31, label="Ramaphosa",color="darkgreen", size = 3)
+ 
+```
+
+In Figure 3, we observe the evolution of emotional dynamics over time. Notably, there is a distinct upswing in the expression of positive emotions, particularly from 2009 when President Zuma assumed office. This trend potentially signifies President Zuma's leadership style, which may have prioritized positivity, unity, and motivation. Alternatively, it could imply that his speeches served as a means of crisis management, offering reassurance to the public and reinforcing the notion of stability and control during challenging times. We can observe a significant increase in negative emotions during the time frame spanning 2021 to 2023, marked notably by heightened expressions of fear and sadness. This trend can be traced back to the profound global impact of the novel coronavirus, which affected nations worldwide in 2020.
+
+## **Review: Using ChatGPT as a Large Language Model**
+
+Large Language Models (LLMs) are sophisticated artificial intelligence tools that assist with numerous tasks, such as compiling, processing, and writing reports, such as this one. ChatGPT, in particular, has shown remarkable capabilities in assisting with such tasks, and so it was used to assist with completing this task and the following is a detailed review of the experience.
+
+#### **Prompting for Writing:**
+
+When it came to the writing process, ChatGPT excelled when it was provided with detailed descriptions of what was required, often in concise bullet points. This structured approach allowed ChatGPT to address each point systematically. While it usually produced well-structured and coherent content, minor human adjustments were occasionally necessary for optimal results.
+
+Its performance deteriorated when clear and detailed instructions were not provided. In such cases, the results were less satisfactory, very generalized and often necessitated additional prompting or fine-tuning.
+
+#### **Prompting for Coding:**
+
+In the realm of coding, ChatGPT proved to be a valuable resource for understanding and debugging errors. When presented with coding errors, it demonstrated an impressive accuracy rate of identifying the root cause of the issue.
+
+Furthermore, for simpler or common coding exercises, ChatGPT typically provided effective solutions on the first attempt. However, it's with more complex coding problems, even when prompts were tuned, ChatGPT struggled to produce correct answers. This is perhaps indicative of the limitations of current AI models in handling intricate coding challenges.
+
+#### **Prompting for Facts and Definitions:**
+
+ChatGPT delivered accurate facts and definitions when prompted. However, due diligence remained essential, as the information provided was cross-checking for precision.
+
+One remarkable aspect of ChatGPT was its ability to explain topics comprehensively, providing definitions that allowed for a solid understanding of the subject matter. It excelled in generating examples and rephrasing information in simpler terms, which greatly aided in achieving a clear and thorough comprehension of the topics it addressed.
+
+In summary, ChatGPT has proven to be a valuable tool for a variety of tasks, particularly in the realm of report compilation, coding assistance, and knowledge provision. While it excels with well-defined and detailed prompts, its limitations become apparent when instructions are less clear or when confronted with intricate coding challenges. Nevertheless, ChatGPT's capabilities in simplifying complex concepts and generating good quality written content offer significant value in a variety of applications.
+
+## References
