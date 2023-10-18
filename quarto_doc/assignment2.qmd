@@ -14,20 +14,10 @@ abstract: |
 
 bibliography: bibliography_Tanweer.bib
 format:
-   pdf: 
-       toc: true
-       number-sections: true
-       extra_dependencies: ["float"]
-       header-includes:
-            - \usepackage{hyperref}
-            - \usepackage{graphicx}
-            - \usepackage[labelfont=bf]{caption}
-            - \captionsetup[table]{font=scriptsize}
-            - \captionsetup[figure]{font=scriptsize}
-            - \usepackage{vmargin}  # Adjust the margin width here
-            - \setmarginsrb{2 cm}{0.5 cm}{2 cm}{1 cm}{1 cm}{1 cm}{1 cm}{1 cm}
-       fig-pos: 'H'
-       fig-format: pdf
+   html:
+      toc: true
+      toc-title: Contents
+      embed-resources: true
 editor: source
 ---
 

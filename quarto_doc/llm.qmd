@@ -1,0 +1,33 @@
+---
+author:
+  - name: Ropafadzo Chimuti
+    email: CHMROP002@myuct.ac.za
+  - name: Tanweer Nujjoo
+    email: NJJSYE001@myuct.ac.za
+  - name: Steven Ellis
+    email: ELLSTE005@uct.ac.za
+        
+title: "Review: Using ChatGPT as a Large Language Model"
+---
+
+Large Language Models (LLMs) are sophisticated artificial intelligence tools that assist with numerous tasks, such as compiling, processing, and writing reports, such as this one. ChatGPT, in particular, has shown remarkable capabilities in assisting with such tasks, and so it was used to assist with completing this task and the following is a detailed review of the experience.
+
+#### **Prompting for Writing:**
+
+When it came to the writing process, ChatGPT excelled when it was provided with detailed descriptions of what was required, often in concise bullet points. This structured approach allowed ChatGPT to address each point systematically. While it usually produced well-structured and coherent content, minor human adjustments were occasionally necessary for optimal results.
+
+Its performance deteriorated when clear and detailed instructions were not provided. In such cases, the results were less satisfactory, very generalized and often necessitated additional prompting or fine-tuning.
+
+#### **Prompting for Coding:**
+
+In the realm of coding, ChatGPT proved to be a valuable resource for understanding and debugging errors. When presented with coding errors, it demonstrated an impressive accuracy rate of identifying the root cause of the issue.
+
+Furthermore, for simpler or common coding exercises, ChatGPT typically provided effective solutions on the first attempt. However, it's with more complex coding problems, even when prompts were tuned, ChatGPT struggled to produce correct answers. This is perhaps indicative of the limitations of current AI models in handling intricate coding challenges.
+
+#### **Prompting for Facts and Definitions:**
+
+ChatGPT delivered accurate facts and definitions when prompted. However, due diligence remained essential, as the information provided was cross-checking for precision.
+
+One remarkable aspect of ChatGPT was its ability to explain topics comprehensively, providing definitions that allowed for a solid understanding of the subject matter. It excelled in generating examples and rephrasing information in simpler terms, which greatly aided in achieving a clear and thorough comprehension of the topics it addressed.
+
+In summary, ChatGPT has proven to be a valuable tool for a variety of tasks, particularly in the realm of report compilation, coding assistance, and knowledge provision. While it excels with well-defined and detailed prompts, its limitations become apparent when instructions are less clear or when confronted with intricate coding challenges. Nevertheless, ChatGPT's capabilities in simplifying complex concepts and generating good quality written content offer significant value in a variety of applications.

@@ -1,0 +1,19 @@
+project:
+  type: website
+  output-dir: docs
+
+website:
+  title: "STA5073Z"
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: assignment2.qmd
+        text: Assignment Submission
+      - href: llm.qmd
+        text: "Review: Using ChatGPT as a Large Language Model"
+
+format:
+  html:
+    theme: cosmo
+    toc: true
